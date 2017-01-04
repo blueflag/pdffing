@@ -36,7 +36,7 @@ function getLocation(href) {
  * Adds a cookie to the request.
  */
 function addCookie(cookie){
-    var re = /(\w+)=(.+?)(?= \w+=|$)/gm;     
+    var re = /(.+)=(.+?)(?= \w+=|$)/gm;     
     var cookieParams = re.exec(cookie)
     if(!page.addCookie({
         'name': cookieParams[1],
