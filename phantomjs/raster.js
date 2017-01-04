@@ -1,4 +1,5 @@
 "use strict";
+require('phantomjs-polyfill')
 var page = require('webpage').create();
 var system = require('system');
 
@@ -11,12 +12,61 @@ if(!program.url || program.help || !program.file){
     console.log('--file [value]', 'file to output to'),
     console.log('--size [value]', 'paper (pdf output) examples: "5in*7.5in", "10cm*20cm", "A4", "Letter" image (png/jpg output) examples: "1920px" entire page, window width 1920px'),
     console.log('--zoom [value]', 'zoom page by %')
+    console.log('--cookie [key=value]', 'add a cookie to the request.')
     phantom.exit(1);
+}
+
+/**
+ * Parses a URL and returns the parts.
+ */
+function getLocation(href) {
+    var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
+    return match && {
+        protocol: match[1],
+        host: match[2],
+        hostname: match[3],
+        port: match[4],
+        pathname: match[5],
+        search: match[6],
+        hash: match[7]
+    }
+}
+
+/**
+ * Adds a cookie to the request.
+ */
+function addCookie(cookie){
+    var re = /(\w+)=(.+?)(?= \w+=|$)/gm;     
+    var cookieParams = re.exec(cookie)
+    if(!page.addCookie({
+        'name': cookieParams[1],
+        'value': cookieParams[2],
+        'domain': getLocation(program.url).hostname,
+        'path': '/'
+    }, true)){
+        console.error('Could not add cookie name: ', cookieParams[1], 'value: ', cookieParams[2])
+    }
 }
 
 address = program.url;
 output = program.file;
 page.viewportSize = { width: 600, height: 600 };
+page.customHeaders = {};
+
+if(program.jwt){
+    page.customHeaders.Authorization = 'Bearer ' + program.jwt;
+}
+if(program.cookie){
+    if (program.cookie.constructor == Array){
+        for(i = 0; i < program.cookie.length; i++){
+            addCookie(program.cookie[i])
+        }
+    }
+    else {
+        addCookie(program.cookie)
+    }
+    console.log('cookies', JSON.stringify(page.cookies))
+}
 if (program.size && output.substr(-4) === ".pdf") {
     size = program.size.split('*');
     page.paperSize = size.length === 2 ? { width: size[0], height: size[1], margin: '0px' }
@@ -39,7 +89,60 @@ if (program.size && output.substr(-4) === ".pdf") {
 if (program.zoom) {
     page.zoomFactor = program.zoom;
 }
-page.open(address, function (status) {
+
+
+page.onPageCreated = function(newPage) {
+  console.log('A new child page was created! Its requested URL is not yet available, though.');
+  // Decorate
+  newPage.onClosing = function(closingPage) {
+    console.log('A child page is closing: ' + closingPage.url);
+  };
+};
+
+page.onLoadStarted = function() {
+  var currentUrl = page.evaluate(function() {
+    return window.location.href;
+  });
+  console.log('Current page ' + currentUrl + ' will go...');
+  console.log('Now loading a new page...');
+};
+
+page.onClosing = function(closingPage) {
+  console.log('The page is closing! URL: ' + closingPage.url);
+};
+
+page.onError = function(msg, trace) {
+  var msgStack = ['ERROR: ' + msg];
+
+  if (trace && trace.length) {
+    msgStack.push('TRACE:');
+    trace.forEach(function(t) {
+      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+    });
+  }
+  console.error(msgStack.join('\n'));
+};
+
+page.onResourceError = function(resourceError) {
+  console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
+  console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+};
+
+page.onResourceReceived = function(response) {
+  console.log('Response (#' + response.id + ', URL "' + response.url + '"): ');
+};
+
+page.onResourceRequested = function(requestData, networkRequest) {
+    
+  console.log('Request (#' + requestData.id + ', URL ', requestData.url + '): ');
+};
+
+page.onAlert = function(msg) {
+  console.log('ALERT: ' + msg);
+};
+
+page.onLoadFinished = function (status) {
+    console.log('Address Opened', address, status)
     if (status !== 'success') {
         console.log('Unable to load the address!');
         phantom.exit(1);
@@ -49,5 +152,7 @@ page.open(address, function (status) {
             phantom.exit();
         }, 200);
     }
-});
+}
+
+page.open(address);
 
