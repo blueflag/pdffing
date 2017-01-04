@@ -2,6 +2,7 @@
 require('phantomjs-polyfill')
 var page = require('webpage').create();
 var system = require('system');
+var Immutable = require('immutable');
 
 var address, output, size, pageWidth, pageHeight;
 var program = require('minimist')(system.args);
@@ -16,6 +17,8 @@ if(!program.url || program.help || !program.file){
     phantom.exit(1);
 }
 
+var requests = Immutable.Map();
+var loaded = false;
 /**
  * Parses a URL and returns the parts.
  */
@@ -126,20 +129,33 @@ page.onError = function(msg, trace) {
 page.onResourceError = function(resourceError) {
   console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
   console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+  requests = requests.delete(resourceError.id);
 };
 
 page.onResourceReceived = function(response) {
   console.log('Response (#' + response.id + ', URL "' + response.url + '"): ');
+  requests = requests.delete(response.id, response.url);
+  if(requests.size === 0 && loaded){
+      renderAndExit();
+  }
 };
 
 page.onResourceRequested = function(requestData, networkRequest) {
-    
-  console.log('Request (#' + requestData.id + ', URL ', requestData.url + '): ');
+    requests = requests.set(requestData.id, requestData.url);
+    console.log('Request (#' + requestData.id + ', URL ', requestData.url + '): ');
 };
 
 page.onAlert = function(msg) {
-  console.log('ALERT: ' + msg);
+    console.log('ALERT: ' + msg);
 };
+
+function renderAndExit(){
+    console.log('Calling Render', requests.size, loaded)
+    window.setTimeout(function () {
+        page.render(output);
+        phantom.exit();
+    }, 200);
+}
 
 page.onLoadFinished = function (status) {
     console.log('Address Opened', address, status)
@@ -147,10 +163,11 @@ page.onLoadFinished = function (status) {
         console.log('Unable to load the address!');
         phantom.exit(1);
     } else {
-        window.setTimeout(function () {
-            page.render(output);
-            phantom.exit();
-        }, 200);
+        loaded = true
+        if(requests.size === 0){
+            renderAndExit();
+        }
+
     }
 }
 
