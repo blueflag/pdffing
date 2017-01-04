@@ -127,7 +127,7 @@ page.onError = function(msg, trace) {
 };
 
 page.onResourceError = function(resourceError) {
-  console.log('Unable to load resource (#' + resourceError.id + 'URL:' + resourceError.url + ')');
+  console.log('Unable to load resource (#' + resourceError.id + ', URL:' + resourceError.url + ')');
   console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
   requests = requests.delete(resourceError.id);
 };
