@@ -4,22 +4,12 @@ var page = require('webpage').create();
 var system = require('system');
 var Immutable = require('immutable');
 var commandLineArgs = require("command-line-args")
-console.log('ARGS : ', system.args)
+
+var requests = Immutable.Map();
 
 var address, output, size, pageWidth, pageHeight;
 var program = require('minimist')(system.args);
-
-
-// var program = commandLineArgs([
-//     { name: 'jwt', type: String },
-//     { name: 'file', type: String },
-//     { name: 'size', type: String },
-//     { name: 'url', type: String },
-//     { name: 'zoom', type: String },
-//     { name: 'cookie',type:String, multiple: true },
-//     ], system.args)
-
-console.log(program);
+var loaded = false;
 
 if(!program.url || program.help || !program.file){
     console.log('--url [value]', '(Required) URL to open');
@@ -31,10 +21,7 @@ if(!program.url || program.help || !program.file){
     phantom.exit(1);
 }
 
-console.log('program', JSON.stringify(program, null, 2))
 
-var requests = Immutable.Map();
-var loaded = false;
 /**
  * Parses a URL and returns the parts.
  */
@@ -115,19 +102,19 @@ if (program.zoom) {
 
 
 page.onPageCreated = function(newPage) {
-  console.log('A new child page was created! Its requested URL is not yet available, though.');
-  // Decorate
-  newPage.onClosing = function(closingPage) {
-    console.log('A child page is closing: ' + closingPage.url);
-  };
+    console.log('A new child page was created! Its requested URL is not yet available, though.');
+    // Decorate
+    newPage.onClosing = function(closingPage) {
+        console.log('A child page is closing: ' + closingPage.url);
+    };
 };
 
 page.onLoadStarted = function() {
-  var currentUrl = page.evaluate(function() {
-    return window.location.href;
-  });
-  console.log('Current page ' + currentUrl + ' will go...');
-  console.log('Now loading a new page...');
+    var currentUrl = page.evaluate(function() {
+        return window.location.href;
+    });
+    console.log('Current page ' + currentUrl + ' will go...');
+    console.log('Now loading a new page...');
 };
 
 page.onClosing = function(closingPage) {
@@ -135,30 +122,30 @@ page.onClosing = function(closingPage) {
 };
 
 page.onError = function(msg, trace) {
-  var msgStack = ['ERROR: ' + msg];
+    var msgStack = ['ERROR: ' + msg];
 
-  if (trace && trace.length) {
-    msgStack.push('TRACE:');
-    trace.forEach(function(t) {
-      msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
-    });
-  }
-  console.error(msgStack.join('\n'));
-  phantom.exit(1);
+    if (trace && trace.length) {
+        msgStack.push('TRACE:');
+        trace.forEach(function(t) {
+        msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+        });
+    }
+    console.error(msgStack.join('\n'));
+    phantom.exit(1);
 };
 
 page.onResourceError = function(resourceError) {
-  console.error('Unable to load resource (#' + resourceError.id + ', URL:' + resourceError.url + ')');
-  console.error('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
-  requests = requests.delete(resourceError.id);
+    console.error('Unable to load resource (#' + resourceError.id + ', URL:' + resourceError.url + ')');
+    console.error('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+    requests = requests.delete(resourceError.id);
 };
 
 page.onResourceReceived = function(response) {
-  console.log('Response (#' + response.id + ', URL "' + response.url + '"): ');
-  requests = requests.delete(response.id, response.url);
-  if(requests.size === 0 && loaded){
-      renderAndExit();
-  }
+    console.log('Response (#' + response.id + ', URL "' + response.url + '"): ');
+    requests = requests.delete(response.id, response.url);
+    if(requests.size === 0 && loaded){
+        renderAndExit();
+    }
 };
 
 page.onResourceRequested = function(requestData, networkRequest) {
