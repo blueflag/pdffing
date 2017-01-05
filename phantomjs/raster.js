@@ -6,7 +6,6 @@ var Immutable = require('immutable');
 
 var address, output, size, pageWidth, pageHeight;
 var program = require('minimist')(system.args);
-console.log(JSON.stringify(program))
 if(!program.url || program.help || !program.file){
     console.log('--url [value]', '(Required) URL to open');
     console.log('--jwt [value]', 'JWT token to use for request'),
@@ -59,6 +58,7 @@ page.customHeaders = {};
 if(program.jwt){
     page.customHeaders.Authorization = 'Bearer ' + program.jwt;
 }
+
 if(program.cookie){
     if (program.cookie.constructor == Array){
         for(i = 0; i < program.cookie.length; i++){
@@ -70,6 +70,7 @@ if(program.cookie){
     }
     console.log('cookies', JSON.stringify(page.cookies))
 }
+
 if (program.size && output.substr(-4) === ".pdf") {
     size = program.size.split('*');
     page.paperSize = size.length === 2 ? { width: size[0], height: size[1], margin: '0px' }
@@ -127,8 +128,8 @@ page.onError = function(msg, trace) {
 };
 
 page.onResourceError = function(resourceError) {
-  console.log('Unable to load resource (#' + resourceError.id + ', URL:' + resourceError.url + ')');
-  console.log('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
+  console.error('Unable to load resource (#' + resourceError.id + ', URL:' + resourceError.url + ')');
+  console.error('Error code: ' + resourceError.errorCode + '. Description: ' + resourceError.errorString);
   requests = requests.delete(resourceError.id);
 };
 
@@ -160,7 +161,7 @@ function renderAndExit(){
 page.onLoadFinished = function (status) {
     console.log('Address Opened', address, status)
     if (status !== 'success') {
-        console.log('Unable to load the address!');
+        console.error('Unable to load the address!');
         phantom.exit(1);
     } else {
         loaded = true
