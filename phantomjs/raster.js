@@ -3,9 +3,24 @@ require('phantomjs-polyfill')
 var page = require('webpage').create();
 var system = require('system');
 var Immutable = require('immutable');
+var commandLineArgs = require("command-line-args")
+console.log('ARGS : ', system.args)
 
 var address, output, size, pageWidth, pageHeight;
 var program = require('minimist')(system.args);
+
+
+// var program = commandLineArgs([
+//     { name: 'jwt', type: String },
+//     { name: 'file', type: String },
+//     { name: 'size', type: String },
+//     { name: 'url', type: String },
+//     { name: 'zoom', type: String },
+//     { name: 'cookie',type:String, multiple: true },
+//     ], system.args)
+
+console.log(program);
+
 if(!program.url || program.help || !program.file){
     console.log('--url [value]', '(Required) URL to open');
     console.log('--jwt [value]', 'JWT token to use for request'),
@@ -15,6 +30,8 @@ if(!program.url || program.help || !program.file){
     console.log('--cookie [key=value]', 'add a cookie to the request.')
     phantom.exit(1);
 }
+
+console.log('program', JSON.stringify(program, null, 2))
 
 var requests = Immutable.Map();
 var loaded = false;
@@ -61,14 +78,16 @@ if(program.jwt){
 
 if(program.cookie){
     if (program.cookie.constructor == Array){
-        for(i = 0; i < program.cookie.length; i++){
+        for(var i = 0; i < program.cookie.length; i++){
             addCookie(program.cookie[i])
         }
     }
     else {
         addCookie(program.cookie)
     }
-    console.log('cookies', JSON.stringify(page.cookies))
+    console.log('cookies : ', JSON.stringify(page.cookies))
+} else {
+    console.log('cookies : none');
 }
 
 if (program.size && output.substr(-4) === ".pdf") {
@@ -125,6 +144,7 @@ page.onError = function(msg, trace) {
     });
   }
   console.error(msgStack.join('\n'));
+  phantom.exit(1);
 };
 
 page.onResourceError = function(resourceError) {
