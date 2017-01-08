@@ -13,7 +13,7 @@ function splitCookies(cookies){
 }
 
 // Your first function handler
- function hello(event, context, cb){
+function exportpdf(event, context, cb){
     var params = {}
     var cookies = {}
     if(event.headers && event.headers.Cookie){
@@ -33,5 +33,5 @@ function splitCookies(cookies){
     })
 }
 
-module.exports.hello = hello
+module.exports.exportpdf = exportpdf
 // You can add more handlers here, and reference them in serverless.yml

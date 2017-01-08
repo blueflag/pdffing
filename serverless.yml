@@ -11,7 +11,7 @@
 #
 # Happy Coding!
 
-service: aws-nodejs # NOTE: update this with your service name
+service: auditr-pdf-exporter
 
 provider:
   name: aws
@@ -34,10 +34,10 @@ plugins:
   - serverless-offline
 
 functions:
-  hello:
+  exportpdf:
     timeout: 300
     memorySize: 1024
-    handler: handler.hello
+    handler: handler.exportpdf
     events:
     - http:
         path: /

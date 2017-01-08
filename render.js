@@ -9,7 +9,7 @@ var Map = require('immutable').Map;
 const TMP_PATH = '/tmp/';
 const FORMAT = 'pdf';
 const SITE = 'http://localhost:8885/';
-const PAPER_SIZE = 'A4';
+const PAPER_SIZE = 'Letter';
 
 function renderSite(params){
     return new Promise((resolve, reject) => {
