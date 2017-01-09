@@ -1,6 +1,6 @@
-const AWS_S3_BUCKET = process.env.S3_BUCKET || 'resources.toyotacheck.com.au';
-const AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT || 's3-ap-southeast-2.amazonaws.com';
-const S3_PATH = process.env.S3_PATH  || 'pauls_test_files'
+var AWS_S3_BUCKET = process.env.S3_BUCKET || 'resources.toyotacheck.com.au';
+var AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT || 's3-ap-southeast-2.amazonaws.com';
+var S3_PATH = process.env.S3_PATH  || 'pauls_test_files';
 var AWS = require ('aws-sdk');
 AWS.config.update({
     region: "ap-southeast-2"

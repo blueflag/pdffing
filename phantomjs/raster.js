@@ -103,7 +103,6 @@ if (program.zoom) {
 
 page.onPageCreated = function(newPage) {
     console.log('A new child page was created! Its requested URL is not yet available, though.');
-    // Decorate
     newPage.onClosing = function(closingPage) {
         console.log('A child page is closing: ' + closingPage.url);
     };
