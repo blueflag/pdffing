@@ -101,7 +101,6 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
                 nightmareCurrent = nightmareCurrent.cookies.set({name: key, value: value, url: SITE});
             }
         }
-        
         nightmareCurrent
             .goto(createUrl(params.path))
             .on('console', () => {

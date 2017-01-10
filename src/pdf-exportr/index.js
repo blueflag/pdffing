@@ -57,6 +57,7 @@ function exportPdf(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLamb
             });
         })
         .catch((error: Error)=>{
+            console.log('Error exporting pdf', error);
             return cb(null,{ 
                 statusCode: 500,
                 body: JSON.stringify({error: error})

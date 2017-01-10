@@ -1,3 +1,4 @@
+
 var AWS_S3_BUCKET = process.env.S3_BUCKET || 'auditr-pdf-export-dev-files';
 var AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT || 's3-ap-southeast-2.amazonaws.com';
 var S3_PATH = process.env.S3_PATH  || 'pauls_test_files';
@@ -6,8 +7,6 @@ AWS.config.update({
     region: "ap-southeast-2"
 });
 var shortid = require('shortid');
-
-
 
 /**
  * Uploads a file to s3 and returns a signed url for accessing the data uploaded to S3.

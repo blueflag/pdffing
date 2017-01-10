@@ -89,10 +89,8 @@ if (program.size && output.substr(-4) === ".pdf") {
         page.viewportSize = { width: pageWidth, height: pageHeight };
         page.clipRect = { top: 0, left: 0, width: pageWidth, height: pageHeight };
     } else {
-        console.log("size:", program.size);
         pageWidth = parseInt(program.size, 10);
         pageHeight = parseInt(pageWidth * 3/4, 10); // it's as good an assumption as any
-        console.log ("pageHeight:",pageHeight);
         page.viewportSize = { width: pageWidth, height: pageHeight };
     }
 }
@@ -149,7 +147,6 @@ page.onResourceReceived = function(response) {
 
 page.onResourceRequested = function(requestData, networkRequest) {
     requests = requests.set(requestData.id, requestData.url);
-    console.log('Request (#' + requestData.id + ', URL ', requestData.url + '): ');
 };
 
 page.onAlert = function(msg) {
