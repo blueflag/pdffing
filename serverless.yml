@@ -1,62 +1,69 @@
-# Welcome to Serverless!
 #
-# This file is the main config file for your service.
-# It's very minimal at this point and uses default values.
-# You can always add more config options for more control.
-# We've included some commented out config examples here.
-# Just uncomment any of them to get that config option.
+# @see https://serverless.com/framework/docs/providers/aws/guide/serverless.yml/
 #
-# For full config options, check the docs:
-#    v1.docs.serverless.com
-#
-# Happy Coding!
 
-service: auditr-pdf-exporter
+service: auditr-pdf-export
+
+# Set env variables in the .env file
+stage: ${env:SERVERLESS_STAGE}
+
+
+# aws s3api create-bucket --bucket auditr-pdf-export-dev-files --region ap-southeast-2 
+# aws s3api create-bucket --bucket auditr-pdf-export-prod-files --region ap-southeast-2 
+
+# resources:
+#   Resources:
+#     exportedFiles:
+#       Type: AWS::S3::Bucket
+#       Properties:
+#         BucketName: auditr-pdf-export-dev-files
 
 provider:
   name: aws
   runtime: nodejs4.3
+  region: ${env:SERVERLESS_REGION}
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+        - "s3:ListBucket"
+        - "s3:GetObjectVersion"
+      Resource: 
+        - "arn:aws:s3:::auditr-pdf-export-dev-files"
+        - "arn:aws:s3:::auditr-pdf-export-dev-files/*"
+package:
+  include: 
+    - node_modules/**
+    - dist/**
+    - nightmare/**
+    - prod.js
+    - package.json
+    - dev.js
 
-# you can overwrite defaults here
-#defaults:
-#  stage: dev
-#  region: us-east-1
+functions:  
+  exportpdf:
+    description: Export HTML pages to pdf with print style sheet (using nightmare), save to S3
+    timeout: 300
+    memorySize: 1024
+    handler: ${env:SERVERLESS_STAGE}.exportPdfPhantom
+    events:
+      - http:
+          path: /
+          method: get
 
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#  exclude:
-#    - exclude-me.js
-#  artifact: my-service-code.zip
+  exportpdf-phantom:
+    description: Export HTML pages to pdf with print style sheet (using phantom), save to S3
+    timeout: 300
+    memorySize: 1024
+    handler: ${env:SERVERLESS_STAGE}.exportPdfNM
+    events:
+      - http:
+          path: /phantom
+          method: get
+  
 
+#   Add any plugins here
 plugins:
   - serverless-offline
 
-functions:
-  exportpdf:
-    timeout: 300
-    memorySize: 1024
-    handler: handler.exportpdf
-    events:
-    - http:
-        path: /
-        method: get
-
-#   you can add any of the following events
-    
-#     - s3: ${bucket}
-#     - schedule: rate(10 minutes)
-#     - sns: greeter-topic
-
-# you can add CloudFormation resource templates here
-#resources:
-#  Resources:
-#    NewResource:
-#      Type: AWS::S3::Bucket
-#      Properties:
-#        BucketName: my-new-bucket
-#  Outputs:
-#     NewOutput:
-#       Description: "Description for the output"
-#       Value: "Some output value"

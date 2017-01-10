@@ -1,9 +1,9 @@
 "use strict";
-require('phantomjs-polyfill')
+require('phantomjs-polyfill');
 var page = require('webpage').create();
 var system = require('system');
 var Immutable = require('immutable');
-var commandLineArgs = require("command-line-args")
+var commandLineArgs = require("command-line-args");
 
 var requests = Immutable.Map();
 
@@ -13,11 +13,11 @@ var loaded = false;
 
 if(!program.url || program.help || !program.file){
     console.log('--url [value]', '(Required) URL to open');
-    console.log('--jwt [value]', 'JWT token to use for request'),
-    console.log('--file [value]', 'file to output to'),
-    console.log('--size [value]', 'paper (pdf output) examples: "5in*7.5in", "10cm*20cm", "A4", "Letter" image (png/jpg output) examples: "1920px" entire page, window width 1920px'),
-    console.log('--zoom [value]', 'zoom page by %')
-    console.log('--cookie [key=value]', 'add a cookie to the request.')
+    console.log('--jwt [value]', 'JWT token to use for request');
+    console.log('--file [value]', 'file to output to');
+    console.log('--size [value]', 'paper (pdf output) examples: "5in*7.5in", "10cm*20cm", "A4", "Letter" image (png/jpg output) examples: "1920px" entire page, window width 1920px');
+    console.log('--zoom [value]', 'zoom page by %');
+    console.log('--cookie [key=value]', 'add a cookie to the request.');
     phantom.exit(1);
 }
 
@@ -126,7 +126,7 @@ page.onError = function(msg, trace) {
     if (trace && trace.length) {
         msgStack.push('TRACE:');
         trace.forEach(function(t) {
-        msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+            msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
         });
     }
     console.error(msgStack.join('\n'));

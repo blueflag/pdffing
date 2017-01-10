@@ -1,11 +1,10 @@
-var AWS_S3_BUCKET = process.env.S3_BUCKET || 'resources.toyotacheck.com.au';
+var AWS_S3_BUCKET = process.env.S3_BUCKET || 'auditr-pdf-export-dev-files';
 var AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT || 's3-ap-southeast-2.amazonaws.com';
 var S3_PATH = process.env.S3_PATH  || 'pauls_test_files';
 var AWS = require ('aws-sdk');
 AWS.config.update({
     region: "ap-southeast-2"
 });
-var s3 = new AWS.S3();
 var shortid = require('shortid');
 
 
@@ -25,7 +24,8 @@ function uploadS3File(buffer, contentType){
             Bucket: AWS_S3_BUCKET,
             Key: key,
             ContentType: contentType || 'application/pdf'
-        }
+        };
+        console.log(params);
         var s3 = new AWS.S3({params: params, endpoint: AWS_S3_ENDPOINT});
         s3.upload({Body: buffer}, (err, data) => {
             if (err != null){

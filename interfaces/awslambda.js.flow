@@ -1,0 +1,20 @@
+// @flow
+
+declare type AWSLambdaEvent = {
+    body: string,
+    headers: {
+        Authorization: string
+    }
+}
+
+declare type AWSLambdaContext = {
+    callbackWaitsForEmptyEventLoop: boolean
+}
+
+declare type AWSLambdaResponse = {
+    statusCode: number,
+    body: string,
+    headers: Object
+};
+
+declare function AWSLambdaCallback(error: Error, response: AWSLambdaResponse): void;

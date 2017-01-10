@@ -1,2 +1,1 @@
-# pdffing
-Export PDFs
+# pdf-export
