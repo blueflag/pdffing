@@ -1,0 +1,19 @@
+{
+    "presets": [
+        "es2017",
+        "es2016",
+        "stage-3",
+        "blueflag"
+    ],
+    "plugins": [
+        "transform-class-properties",
+        "transform-runtime"
+    ],
+    "env": {
+        "test": {
+            "plugins": [
+                "istanbul"
+            ]
+        }
+    }
+}
