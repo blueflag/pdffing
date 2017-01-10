@@ -27,8 +27,6 @@ provider:
       Action:
         - "s3:PutObject"
         - "s3:GetObject"
-        - "s3:ListBucket"
-        - "s3:GetObjectVersion"
       Resource: 
         - "arn:aws:s3:::auditr-pdf-export-dev-files"
         - "arn:aws:s3:::auditr-pdf-export-dev-files/*"
@@ -43,7 +41,7 @@ package:
 
 functions:  
   exportpdf:
-    description: Export HTML pages to pdf with print style sheet (using nightmare), save to S3
+    description: Export HTML pages to pdf with print style sheet (using phantom), save to S3
     timeout: 300
     memorySize: 1024
     handler: ${env:SERVERLESS_STAGE}.exportPdfPhantom
@@ -52,14 +50,14 @@ functions:
           path: /
           method: get
 
-  exportpdf-phantom:
-    description: Export HTML pages to pdf with print style sheet (using phantom), save to S3
+  exportpdf-nightmare:
+    description: Export HTML pages to pdf with print style sheet (using nightmare), save to S3
     timeout: 300
     memorySize: 1024
     handler: ${env:SERVERLESS_STAGE}.exportPdfNM
     events:
       - http:
-          path: /phantom
+          path: /nightmare
           method: get
   
 
