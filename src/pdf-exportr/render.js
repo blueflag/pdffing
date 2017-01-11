@@ -1,3 +1,4 @@
+//@flow
 const path = require('path');
 const fs = require('fs');
 const childProcess = require('child_process');
@@ -9,15 +10,16 @@ const Map = require('immutable').Map;
 const TMP_PATH = '/tmp/';
 const FORMAT = 'pdf';
 const SITE = 'http://toyotainstituteaustralia.com.au/';
-const PAPER_SIZE = 'Letter';
-const Nightmare = require('nightmare');
 
+const Nightmare = require('nightmare');
 var nightmare = null;
 
 export type RenderParams = {
     jwt: string,
     cookies: string[],
-    path: string
+    path: string,
+    paperSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid',
+    orientation: 'portrait' | 'landscape'
 };
 
 function createUrl(path: string): string{
@@ -25,13 +27,14 @@ function createUrl(path: string): string{
 }
 
 export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve: Promise.resolve, reject: Promise.reject) => {
         var file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
         var childArgs = [
             path.join(__dirname, '/phantomjs/raster.js'),
             '--url', createUrl(params.path),
             '--file',file_path,
-            '--size',PAPER_SIZE
+            '--size',params.paperSize,
+            '--orientation', params.orientation
         ];
         if(params){
             if(params.jwt){
@@ -46,23 +49,23 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
         }
 
         var phantom = childProcess.spawn(binPath, childArgs);
-        phantom.stdout.on('data', (data) => {
+        phantom.stdout.on('data', (data: string) => {
             console.log(`phantom: ${data}`);
         });
 
-        phantom.stderr.on('data', (data) => {
+        phantom.stderr.on('data', (data: string) => {
             console.error(`phantom: ${data}`);
         });
 
-        phantom.on('close', (code) => {
+        phantom.on('close', (code: int) => {
             console.log(`child process exited with code ${code}`);
             if(code === 0){
-                fs.readFile(file_path, (err, data)=> {
+                fs.readFile(file_path,(err: Error, data: Buffer): Promise=> {
                     if(err){
                         console.error('Error reading export', err);
-                        reject(err);
+                        return reject(err);
                     }
-                    fs.unlink(file_path, (err) => {
+                    fs.unlink(file_path, (err: Error) => {
                         if (err) console.error(err);
                     });
                     return resolve(data);
@@ -93,7 +96,7 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
     }
     // headers go here.
     let file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve: Promise.resolve) => {
         let nightmareCurrent = nightmare;
         if(params.cookies){ 
             let cookieMap = Map(params.cookies);
@@ -111,10 +114,14 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
                 return XMLHttpRequest.prototype.outstanding_length === 0;
             })
             .wait(100)
-            .pdf(file_path, {pageSize: PAPER_SIZE})
+            .pdf(file_path, {
+                pageSize: params.paperSize,
+                printBackground: true,
+                landscape: params.orientation === 'landscape'
+            })
             .then(() => {
-                fs.readFile(file_path, (err, data)=> {
-                    fs.unlink(file_path, (err) => {
+                fs.readFile(file_path,(err: Error, data: Buffer): Promise => {
+                    fs.unlink(file_path, (err: Error) => {
                         if (err) console.error(err);
                     });
                     return resolve(data);

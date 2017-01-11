@@ -4,12 +4,12 @@
 import {
     renderSitePhantom, 
     renderSiteNightmare
-} from './render'
+} from './render';
 var upload = require('./uploadS3');
 
 import type {RenderParams} from './render';
 
-process.on('unhandledRejection', (reason, p: Promise) => {
+process.on('unhandledRejection', (reason: Error | any, p: Promise) => {
     console.error('Unhandled Promise Rejection:', reason, p);
 });
 
@@ -42,6 +42,8 @@ function parseParameters(event: AWSLambdaEvent, context: AWSLambdaContext): Rend
             params.cookies = cookies;
         if(event.queryStringParameters.path)
             params.path = event.queryStringParameters.path;
+        params.paperSize = event.queryStringParameters.paperSize || 'A4'; 
+        params.orientation = event.queryStringParameters.orientation || 'portrait'; 
     }
     return params;
 }
@@ -51,26 +53,23 @@ function exportPdf(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLamb
     let params = parseParameters(event, context);
     renderMethod(params).then(upload)
         .then((url: string) => {
-            return cb(null,{ 
+            cb(null,{ 
                 statusCode: 200,
                 body: JSON.stringify({url: url})
             });
         })
         .catch((error: Error)=>{
             console.log('Error exporting pdf', error);
-            return cb(null,{ 
-                statusCode: 500,
-                body: JSON.stringify({error: error})
-            });
+            cb(error);
         });
 }
 
 // Your first function handler
-function exportPdfNM(event, context, cb){
+function exportPdfNM(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLambdaCallback){
     exportPdf(event, context, cb, renderSiteNightmare);
 }
 
-function exportPdfPhantom(event, context, cb){
+function exportPdfPhantom(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLambdaCallback){
     exportPdf(event, context, cb, renderSitePhantom);
 }
 

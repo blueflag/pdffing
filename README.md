@@ -47,6 +47,3 @@ to test a locally running, offline version of the server run the following.
 yarn run dev
 ```
 
-
-
-

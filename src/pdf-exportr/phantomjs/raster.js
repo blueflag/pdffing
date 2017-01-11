@@ -7,7 +7,7 @@ var commandLineArgs = require("command-line-args");
 
 var requests = Immutable.Map();
 
-var address, output, size, pageWidth, pageHeight;
+var address, output, size, pageWidth, pageHeight, orientation ;
 var program = require('minimist')(system.args);
 var loaded = false;
 
@@ -56,6 +56,7 @@ function addCookie(cookie){
 
 address = program.url;
 output = program.file;
+orientation = program.orientation;
 page.viewportSize = { width: 600, height: 600 };
 page.customHeaders = {};
 
@@ -80,7 +81,7 @@ if(program.cookie){
 if (program.size && output.substr(-4) === ".pdf") {
     size = program.size.split('*');
     page.paperSize = size.length === 2 ? { width: size[0], height: size[1], margin: '0px' }
-                                        : { format: program.size, orientation: 'portrait', margin: '1cm' };
+                                        : { format: program.size, orientation: orientation, margin: '1cm' };
 } else if (program.size && program.size[3].substr(-2) === "px") {
     size = program.size[3].split('*');
     if (size.length === 2) {
