@@ -3,8 +3,10 @@
 declare type AWSLambdaEvent = {
     body: string,
     headers: {
-        Authorization: string
-    }
+        Authorization: string,
+        Cookie: string 
+    },
+    queryStringParameters: Object
 }
 
 declare type AWSLambdaContext = {

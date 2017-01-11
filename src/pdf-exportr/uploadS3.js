@@ -1,14 +1,12 @@
 
 //@flow
 
-var AWS_S3_BUCKET = process.env.S3_BUCKET || 'auditr-pdf-export-dev-files';
-// var AWS_S3_ENDPOINT = process.env.AWS_S3_ENDPOINT || 's3-ap-southeast-2.amazonaws.com';
-var S3_PATH = process.env.S3_PATH  || 'pauls_test_files';
-var AWS = require ('aws-sdk');
-// AWS.config.update({
-//     region: "ap-southeast-2"
-// });
-var shortid = require('shortid');
+const AWS_S3_BUCKET = process.env.S3_BUCKET || 'auditr-pdf-export-dev-files';
+const S3_PATH = process.env.S3_PATH  || 'pauls_test_files';
+const CONTENT_TYPE = 'application/pdf';
+const AWS = require ('aws-sdk');
+const shortid = require('shortid');
+
 
 /**
  * Uploads a file to s3 and returns a signed url for accessing the data uploaded to S3.
@@ -18,18 +16,16 @@ var shortid = require('shortid');
  * @param {string} contentType type of content being uploaded.
  * @returns {Promise<string>} signed url for accessing content.
  */
-function uploadS3File(buffer: Buffer, contentType: string): Promise<string> {
-    return new Promise((resolve: Promise.resolve, reject: Promise.reject) => {
+function uploadS3File(buffer: Buffer): Promise<string> {
+    return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
         var key = `${S3_PATH}/${shortid.generate()}`;
         var params = {
             Bucket: AWS_S3_BUCKET,
             Key: key,
-            ContentType: contentType || 'application/pdf'
+            ContentType: CONTENT_TYPE
         };
-        console.log(params);
-        // var s3 = new AWS.S3({params: params, endpoint: AWS_S3_ENDPOINT});
         var s3 = new AWS.S3({params: params});
-        s3.upload({Body: buffer}, (err: Error): Promise => {
+        s3.upload({Body: buffer}, (err: Error): void => {
             if (err != null){
                 return reject(err);
             } else {

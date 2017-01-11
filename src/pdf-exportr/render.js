@@ -11,23 +11,23 @@ const TMP_PATH = '/tmp/';
 const FORMAT = 'pdf';
 const SITE = 'http://toyotainstituteaustralia.com.au/';
 
-const Nightmare = require('nightmare');
-var nightmare = null;
+
+// var nightmare = null;
 
 export type RenderParams = {
     jwt: string,
-    cookies: string[],
+    cookies: Object,
     path: string,
     paperSize: 'A3' | 'A4' | 'A5' | 'Legal' | 'Letter' | 'Tabloid',
     orientation: 'portrait' | 'landscape'
 };
 
-function createUrl(path: string): string{
+function createUrl(path: ?string): string{
     return `${SITE}${path||''}`;
 }
 
 export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
-    return new Promise((resolve: Promise.resolve, reject: Promise.reject) => {
+    return new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
         var file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
         var childArgs = [
             path.join(__dirname, '/phantomjs/raster.js'),
@@ -57,15 +57,15 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
             console.error(`phantom: ${data}`);
         });
 
-        phantom.on('close', (code: int) => {
+        phantom.on('close', (code: number) => {
             console.log(`child process exited with code ${code}`);
             if(code === 0){
-                fs.readFile(file_path,(err: Error, data: Buffer): Promise=> {
+                fs.readFile(file_path,(err: any, data: any): void => {
                     if(err){
                         console.error('Error reading export', err);
                         return reject(err);
                     }
-                    fs.unlink(file_path, (err: Error) => {
+                    fs.unlink(file_path, (err: any) => {
                         if (err) console.error(err);
                     });
                     return resolve(data);
@@ -86,17 +86,20 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
  */
 
 export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{    
-    if(nightmare === null){
-        nightmare = Nightmare({
-            show: false,
-            webPreferences: {
-                preload: path.resolve(path.join(__dirname,"nightmare","preload.js"))
-            }
-        });
-    }
+    // type XMLHttpRequest = {
+    //     outstanding_length: number
+    // };
+    
+    const Nightmare = require('nightmare');
+    let nightmare = Nightmare({
+        show: false,
+        webPreferences: {
+            preload: path.resolve(path.join(__dirname,"nightmare","preload.js"))
+        }
+    });
     // headers go here.
     let file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
-    return new Promise((resolve: Promise.resolve) => {
+    return new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
         let nightmareCurrent = nightmare;
         if(params.cookies){ 
             let cookieMap = Map(params.cookies);
@@ -111,7 +114,8 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
             })
             .wait(100)
             .wait((): boolean => {
-                return XMLHttpRequest.prototype.outstanding_length === 0;
+                // $FlowFixMe
+                return XMLHttpRequest.outstanding_length === 0;
             })
             .wait(100)
             .pdf(file_path, {
@@ -120,12 +124,16 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
                 landscape: params.orientation === 'landscape'
             })
             .then(() => {
-                fs.readFile(file_path,(err: Error, data: Buffer): Promise => {
-                    fs.unlink(file_path, (err: Error) => {
+                fs.readFile(file_path,(err: any, data: any): void => {
+                    if(err){
+                        console.error('Error reading export', err);
+                        return reject(err);
+                    }
+                    fs.unlink(file_path, (err: any) => {
                         if (err) console.error(err);
                     });
                     return resolve(data);
-                });  
+                });   
             });
     });
 }

@@ -9,7 +9,7 @@ var upload = require('./uploadS3');
 
 import type {RenderParams} from './render';
 
-process.on('unhandledRejection', (reason: Error | any, p: Promise) => {
+process.on('unhandledRejection', (reason: Error | any, p: Promise<any>) => {
     console.error('Unhandled Promise Rejection:', reason, p);
 });
 
@@ -48,7 +48,7 @@ function parseParameters(event: AWSLambdaEvent, context: AWSLambdaContext): Rend
     return params;
 }
 
-function exportPdf(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLambdaCallback, renderMethod: (params: RenderParams) => Buffer){
+function exportPdf(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLambdaCallback, renderMethod: (params: RenderParams) => Promise<Buffer>){
     context.callbackWaitsForEmptyEventLoop = false;
     let params = parseParameters(event, context);
     renderMethod(params).then(upload)
