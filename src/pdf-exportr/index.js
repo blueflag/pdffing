@@ -9,14 +9,6 @@ var upload = require('./uploadS3');
 
 import type {RenderParams} from './render';
 
-process.on('unhandledRejection', (reason: Error | any, p: Promise<any>) => {
-    console.error('Unhandled Promise Rejection:', reason, p);
-});
-
-process.on('uncaughtException', (err: Error) => {
-    console.error('Uncaught Exception:', err);
-});
-
 function splitCookies(cookies: string): Object {
     var cookieValues = cookies.split(';');
     var cookieMap = {};
@@ -42,8 +34,10 @@ function parseParameters(event: AWSLambdaEvent, context: AWSLambdaContext): Rend
             params.cookies = cookies;
         if(event.queryStringParameters.path)
             params.path = event.queryStringParameters.path;
-        params.paperSize = event.queryStringParameters.paperSize || 'A4'; 
-        params.orientation = event.queryStringParameters.orientation || 'portrait'; 
+        if(event.queryStringParameters.paperSize)
+            params.paperSize = event.queryStringParameters.paperSize; 
+        if(event.queryStringParameters.orientation)
+            params.orientation = event.queryStringParameters.orientation; 
     }
     return params;
 }
@@ -51,6 +45,7 @@ function parseParameters(event: AWSLambdaEvent, context: AWSLambdaContext): Rend
 function exportPdf(event: AWSLambdaEvent, context: AWSLambdaContext, cb: AWSLambdaCallback, renderMethod: (params: RenderParams) => Promise<Buffer>){
     context.callbackWaitsForEmptyEventLoop = false;
     let params = parseParameters(event, context);
+
     renderMethod(params).then(upload)
         .then((url: string) => {
             cb(null,{ 
