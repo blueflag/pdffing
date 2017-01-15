@@ -306,6 +306,7 @@ test('renderSitePhantom - rejects with error if reading file fails', (t: AssertC
 
 
 test('renderSitePhantom - logs messages on STDOUT from phantom', (t: AssertContext) : void => {
+    
     var errorSpy = sinon.spy(console, 'error');
     var logSpy = sinon.spy(console, 'log');
 
@@ -348,7 +349,7 @@ test('renderSitePhantom - logs messages on STDOUT from phantom', (t: AssertConte
             }
         }
     });
-    var promise = renderSitePhantom({
+    renderSitePhantom({
         cookies: {
             'A' : 'B',
             'C' : 'D'
@@ -359,4 +360,64 @@ test('renderSitePhantom - logs messages on STDOUT from phantom', (t: AssertConte
     });
     t.is(logSpy.calledWith('phantom: test'), true);
     t.is(errorSpy.calledWith('phantom: test'), true);
+    logSpy.restore();
+    errorSpy.restore();
+});
+
+test('renderSitePhantom - logs error if unlink fails', (t: AssertContext) : void => {
+    
+    var errorSpy = sinon.spy(console, 'error');
+    var logSpy = sinon.spy(console, 'log');
+
+    var onCloseCb;
+    var spawnSpy = sinon.spy(() => ({
+        stdout: {
+            on: (type, cb) => {
+            }
+        },
+        stderr: {
+            on: (type, cb) => {
+            }
+        }, 
+        on:(type: string, cb: (any)) => {
+            if(type === 'close')
+                onCloseCb = cb;
+        }
+    }));
+    var unlinkError = new Error('UNLINK ERROR');
+    var {renderSitePhantom} = proxyquire('../render', {
+        'child_process': {
+            spawn: spawnSpy
+        },
+        'phantomjs-prebuilt':{
+            path: "path"
+        },
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb(null, {});
+            },
+            unlink: (path: string, cb) => {
+                cb(unlinkError);
+            }
+        }
+    });
+    renderSitePhantom({
+        cookies: {
+            'A' : 'B',
+            'C' : 'D'
+        }
+    })
+    .then((param: any): any => {
+        return param;
+    });
+    onCloseCb(0);
+    t.is(errorSpy.calledWith(unlinkError), true);
+    logSpy.restore();
+    errorSpy.restore();
 });

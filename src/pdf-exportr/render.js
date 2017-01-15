@@ -35,17 +35,17 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
             '--size',params.paperSize || 'A4',
             '--orientation', params.orientation || 'landscape'
         ];
-        if(params){
-            if(params.jwt){
-                childArgs.push('--jwt', params.jwt);
-            }
-            if(params.cookies){
-                var cookieMap = Map(params.cookies);
-                for (var [key, value] of cookieMap.entries()) {
-                    childArgs.push('--cookie', key + "=" + value);
-                }
+        
+        if(params.jwt){
+            childArgs.push('--jwt', params.jwt);
+        }
+        if(params.cookies){
+            var cookieMap = Map(params.cookies);
+            for (var [key, value] of cookieMap.entries()) {
+                childArgs.push('--cookie', key + "=" + value);
             }
         }
+        
 
         var phantom = childProcess.spawn(binPath, childArgs);
         phantom.stdout.on('data', (data: string) => {
