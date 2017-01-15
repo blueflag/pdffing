@@ -1,13 +1,14 @@
+/* global phantom */
+
 "use strict";
 require('phantomjs-polyfill');
+import {Map} from 'immutable';
 var page = require('webpage').create();
 var system = require('system');
-var Immutable = require('immutable');
-var commandLineArgs = require("command-line-args");
 
-var requests = Immutable.Map();
+var requests = Map();
 
-var address, output, size, pageWidth, pageHeight, orientation ;
+var address, output, size, pageWidth, pageHeight, orientation;
 var program = require('minimist')(system.args);
 var loaded = false;
 
@@ -25,7 +26,7 @@ if(!program.url || program.help || !program.file){
 /**
  * Parses a URL and returns the parts.
  */
-function getLocation(href) {
+function getLocation(href: string): Object {
     var match = href.match(/^(https?\:)\/\/(([^:\/?#]*)(?:\:([0-9]+))?)([\/]{0,1}[^?#]*)(\?[^#]*|)(#.*|)$/);
     return match && {
         protocol: match[1],
@@ -35,7 +36,7 @@ function getLocation(href) {
         pathname: match[5],
         search: match[6],
         hash: match[7]
-    }
+    };
 }
 
 /**
@@ -43,7 +44,7 @@ function getLocation(href) {
  */
 function addCookie(cookie){
     var re = /(.+)=(.+?)(?= \w+=|$)/gm;     
-    var cookieParams = re.exec(cookie)
+    var cookieParams = re.exec(cookie);
     if(!page.addCookie({
         'name': cookieParams[1],
         'value': cookieParams[2],
@@ -67,13 +68,13 @@ if(program.jwt){
 if(program.cookie){
     if (program.cookie.constructor == Array){
         for(var i = 0; i < program.cookie.length; i++){
-            addCookie(program.cookie[i])
+            addCookie(program.cookie[i]);
         }
     }
     else {
-        addCookie(program.cookie)
+        addCookie(program.cookie);
     }
-    console.log('cookies : ', JSON.stringify(page.cookies))
+    console.log('cookies : ', JSON.stringify(page.cookies));
 } else {
     console.log('cookies : none');
 }
@@ -116,7 +117,7 @@ page.onLoadStarted = function() {
 };
 
 page.onClosing = function(closingPage) {
-  console.log('The page is closing! URL: ' + closingPage.url);
+    console.log('The page is closing! URL: ' + closingPage.url);
 };
 
 page.onError = function(msg, trace) {
@@ -150,12 +151,12 @@ page.onResourceRequested = function(requestData, networkRequest) {
     requests = requests.set(requestData.id, requestData.url);
 };
 
-page.onAlert = function(msg) {
-    console.log('ALERT: ' + msg);
+page.onAlert = function(msg: string) {
+    console.log(`ALERT: ${msg}`);
 };
 
 function renderAndExit(){
-    console.log('Calling Render', requests.size, loaded)
+    console.log('Calling Render', requests.size, loaded);
     window.setTimeout(function () {
         page.render(output);
         phantom.exit();
@@ -163,18 +164,18 @@ function renderAndExit(){
 }
 
 page.onLoadFinished = function (status) {
-    console.log('Address Opened', address, status)
+    console.log('Address Opened', address, status);
     if (status !== 'success') {
         console.error('Unable to load the address!');
         phantom.exit(1);
     } else {
-        loaded = true
+        loaded = true;
         if(requests.size === 0){
             renderAndExit();
         }
 
     }
-}
+};
 
 page.open(address);
 

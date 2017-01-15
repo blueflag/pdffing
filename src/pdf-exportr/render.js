@@ -7,12 +7,11 @@ const binPath = phantomjs.path;
 const shortid = require('shortid');
 const Map = require('immutable').Map;
 
+const PHANTOM_SCRIPT = '/phantomjs/raster.js';
 const TMP_PATH = '/tmp/';
 const FORMAT = 'pdf';
-const SITE = 'http://toyotainstituteaustralia.com.au/';
 
-
-// var nightmare = null;
+export const SITE = 'http://toyotainstituteaustralia.com.au/';
 
 export type RenderParams = {
     jwt: string,
@@ -30,11 +29,11 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
     return new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
         var file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
         var childArgs = [
-            path.join(__dirname, '/phantomjs/raster.js'),
+            path.join(__dirname, PHANTOM_SCRIPT),
             '--url', createUrl(params.path),
             '--file',file_path,
-            '--size',params.paperSize,
-            '--orientation', params.orientation
+            '--size',params.paperSize || 'A4',
+            '--orientation', params.orientation || 'landscape'
         ];
         if(params){
             if(params.jwt){
@@ -72,6 +71,7 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
                 }); 
             } else {
                 console.error('Error executing process');
+                reject(Error('Error executing process'));
             }
         });
     });
@@ -86,19 +86,14 @@ export function renderSitePhantom(params: RenderParams): Promise<Buffer>{
  */
 
 export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{    
-    // type XMLHttpRequest = {
-    //     outstanding_length: number
-    // };
-    
     const Nightmare = require('nightmare');
+    let file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
     let nightmare = Nightmare({
         show: false,
         webPreferences: {
             preload: path.resolve(path.join(__dirname,"nightmare","preload.js"))
         }
     });
-    // headers go here.
-    let file_path = path.join(TMP_PATH, `${shortid.generate()}.${FORMAT}`);
     return new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
         let nightmareCurrent = nightmare;
         if(params.cookies){ 
