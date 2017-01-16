@@ -364,7 +364,7 @@ test('renderSitePhantom - logs messages on STDOUT from phantom', (t: AssertConte
     errorSpy.restore();
 });
 
-test('renderSitePhantom - logs error if unlink fails', (t: AssertContext) : void => {
+test('renderSitePhantom - Resolves with the data from the read.', (t: AssertContext) : void => {
     
     var errorSpy = sinon.spy(console, 'error');
     var logSpy = sinon.spy(console, 'log');
@@ -420,4 +420,171 @@ test('renderSitePhantom - logs error if unlink fails', (t: AssertContext) : void
     t.is(errorSpy.calledWith(unlinkError), true);
     logSpy.restore();
     errorSpy.restore();
+});
+
+
+test('renderSiteNightmare - after process completes it reads the file and returns the buffer', (t: AssertContext) : void => {
+    var nightmareMock = function(){
+        return ({
+            goto: function(){
+                return this;
+            },
+            on: function(){
+                return this;
+            },
+            wait: function(){
+                return this;
+            },
+            pdf: function(){
+                return this;
+            },
+            then: function(cb){
+                cb();
+                return this;
+            },
+            cookies: {
+                set: function(){}
+            }
+        });
+    };
+    var {renderSiteNightmare} = proxyquire('../render', {
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path',
+            resolve: () => 'resolved_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb(null, 'FAKE_DATA');
+            },
+            unlink: (path: string, cb) => {
+                cb(null);
+            }
+        },
+        'nightmare':nightmareMock
+    });
+    return renderSiteNightmare({
+    })
+    .then((param: any): any => {
+        t.is(param, 'FAKE_DATA');
+        return param;
+    });
+});
+
+
+test('renderSiteNightmare - after process completes it returns an error if readfile fails', (t: AssertContext) : void => {
+    var nightmareMock = function(){
+        return ({
+            goto: function(){
+                return this;
+            },
+            on: function(){
+                return this;
+            },
+            wait: function(){
+                return this;
+            },
+            pdf: function(){
+                return this;
+            },
+            then: function(cb){
+                cb();
+                return this;
+            },
+            cookies: {
+                set: function(){}
+            }
+        });
+    };
+    var {renderSiteNightmare} = proxyquire('../render', {
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path',
+            resolve: () => 'resolved_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb('FAKE_ERROR');
+            },
+            unlink: (path: string, cb) => {
+                cb(null);
+            }
+        },
+        'nightmare':nightmareMock
+    });
+    return renderSiteNightmare({
+    })
+    .catch((param: any): any => {
+        t.is(param, 'FAKE_ERROR');
+        return param;
+    });
+});
+
+
+test('renderSiteNightmare - Puts cookies in the cookies map', (t: AssertContext) : void => {
+    var setSpy = sinon.spy((cookie) => nightmareMock());
+    var nightmareMock = function(){
+        return ({
+            goto: function(){
+                return this;
+            },
+            on: function(){
+                return this;
+            },
+            wait: function(){
+                return this;
+            },
+            pdf: function(){
+                return this;
+            },
+            then: function(cb){
+                cb();
+                return this;
+            },
+            cookies: {
+                set: setSpy
+            }
+        });
+    };
+    var {renderSiteNightmare} = proxyquire('../render', {
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path',
+            resolve: () => 'resolved_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb(null, 'FAKE_DATA');
+            },
+            unlink: (path: string, cb) => {
+                cb(null);
+            }
+        },
+        'nightmare':nightmareMock
+    });
+    return renderSiteNightmare({
+        cookies: {
+            'A' : 'B',
+            'C' : 'D'
+        }
+    })
+    .then((param: any): any => {
+        t.is(setSpy.calledWith({
+            name: 'A', 
+            value:'B', 
+            url: 'http://toyotainstituteaustralia.com.au/'
+        }), true);
+        t.is(setSpy.calledWith({
+            name: 'C', 
+            value:'D', 
+            url: 'http://toyotainstituteaustralia.com.au/'
+        }), true);
+        return param;
+    });
 });

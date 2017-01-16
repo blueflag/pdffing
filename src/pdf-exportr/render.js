@@ -94,6 +94,7 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
             preload: path.resolve(path.join(__dirname,"nightmare","preload.js"))
         }
     });
+
     return new Promise((resolve: (result: Buffer) => void, reject: (error: Error) => void) => {
         let nightmareCurrent = nightmare;
         if(params.cookies){ 
