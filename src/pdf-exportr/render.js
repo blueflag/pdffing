@@ -105,7 +105,7 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
         }
         nightmareCurrent
             .goto(createUrl(params.path))
-            .on('console', (...args) => {
+            .on('console', (...args: any) => {
                 console.log(...args);
             })
             .wait(100)
@@ -129,7 +129,7 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
                         if (err) console.error(err);
                     });
                     return resolve(data);
-                });   
+                });
             });
     });
 }
