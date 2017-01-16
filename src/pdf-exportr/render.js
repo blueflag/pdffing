@@ -105,8 +105,8 @@ export function renderSiteNightmare(params: RenderParams): Promise<Buffer>{
         }
         nightmareCurrent
             .goto(createUrl(params.path))
-            .on('console', () => {
-                console.log(arguments);
+            .on('console', (...args) => {
+                console.log(...args);
             })
             .wait(100)
             .wait((): boolean => {

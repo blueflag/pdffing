@@ -524,6 +524,57 @@ test('renderSiteNightmare - after process completes it returns an error if readf
     });
 });
 
+test('renderSiteNightmare - logs an error if file delete fails', (t: AssertContext) : void => {
+    var nightmareMock = function(){
+        return ({
+            goto: function(){
+                return this;
+            },
+            on: function(){
+                return this;
+            },
+            wait: function(param){
+                return this;
+            },
+            pdf: function(){
+                return this;
+            },
+            then: function(cb){
+                cb();
+                return this;
+            },
+            cookies: {
+                set: function(){}
+            }
+        });
+    };
+    
+    var {renderSiteNightmare} = proxyquire('../render', {
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path',
+            resolve: () => 'resolved_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb(null);
+            },
+            unlink: (path: string, cb) => {
+                cb('FAKE_ERROR');
+            }
+        },
+        'nightmare':nightmareMock
+    });
+    sinon.spy(console, 'error');
+    return renderSiteNightmare({})
+        .then((): any => {
+            t.is(console.error.calledWith('FAKE_ERROR'), true);
+            console.error.restore();
+            return;
+        });
+});
 
 test('renderSiteNightmare - Puts cookies in the cookies map', (t: AssertContext) : void => {
     var setSpy = sinon.spy((cookie) => nightmareMock());
@@ -587,4 +638,117 @@ test('renderSiteNightmare - Puts cookies in the cookies map', (t: AssertContext)
         }), true);
         return param;
     });
+});
+
+test.cb('renderSiteNightmare - waits for XMLHttpRequest to be empty', (t: AssertContext) : void => {
+    global.XMLHttpRequest = {
+        outstanding_length: 2
+    };
+    var nightmareMock = function(){
+        return ({
+            goto: function(){
+                return this;
+            },
+            on: function(){
+                return this;
+            },
+            wait: function(param){
+                if(typeof param === 'function'){
+                    t.is(param(), false);
+                    t.end();
+                }
+                return this;
+            },
+            pdf: function(){
+                return this;
+            },
+            then: function(cb){
+                cb();
+                return this;
+            },
+            cookies: {
+                set: function(){}
+            }
+        });
+    };
+    
+    var {renderSiteNightmare} = proxyquire('../render', {
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path',
+            resolve: () => 'resolved_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb(null);
+            },
+            unlink: (path: string, cb) => {
+                cb('FAKE_ERROR');
+            }
+        },
+        'nightmare':nightmareMock
+    });
+    renderSiteNightmare({})
+        .then((): any => {
+            return;
+        });
+});
+
+test('renderSiteNightmare - logs console errors', (t: AssertContext) : void => {
+    global.XMLHttpRequest = {
+        outstanding_length: 2
+    };
+    var nightmareMock = function(){
+        return ({
+            goto: function(){
+                return this;
+            },
+            on: function(command, cb){
+                if(command === 'console')
+                    cb('test console log');
+                return this;
+            },
+            wait: function(param){
+                return this;
+            },
+            pdf: function(){
+                return this;
+            },
+            then: function(cb){
+                cb();
+                return this;
+            },
+            cookies: {
+                set: function(){}
+            }
+        });
+    };
+    
+    var {renderSiteNightmare} = proxyquire('../render', {
+        'shortid':{
+            generate: () => 'shortid'
+        },
+        'path':{
+            join: () => 'joined_path',
+            resolve: () => 'resolved_path'
+        },
+        'fs': {
+            readFile: (path: string, cb) => {
+                cb(null);
+            },
+            unlink: (path: string, cb) => {
+                cb('FAKE_ERROR');
+            }
+        },
+        'nightmare':nightmareMock
+    });
+    sinon.spy(console, 'log');
+    return renderSiteNightmare({})
+        .then((): any => {
+            t.is(console.log.calledWith('test console log'), true);
+            console.log.restore();
+            return;
+        });
 });
