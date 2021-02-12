@@ -1,0 +1,35 @@
+{
+  "compilerOptions": {
+    "allowJs": false,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "esModuleInterop": true,
+    "module": "commonjs",
+    "noEmit": true,
+    "moduleResolution": "node",
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "target": "es2015",
+    "lib": [
+      "es2019"
+    ],
+    "typeRoots": [
+      "node_modules/@types",
+      "./src/@types"
+    ],
+    "rootDir": "./src",
+    "paths": {
+      "bfu-data-lambda-v2/src/*": ["src/*"]
+    },
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": [
+    "./src/**/*",
+  ]
+}

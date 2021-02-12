@@ -1,0 +1,22 @@
+version: '2.1'
+services:
+  localstack:
+    container_name: "${LOCALSTACK_DOCKER_NAME-localstack_bfu}"
+    image: localstack/localstack-full:0.12.6
+    ports:
+      - "4566:4566"
+      - "4567:4567"
+      - "4569:4569"
+    environment:
+      - DATA_DIR=${DATA_DIR- }
+      - PORT_WEB_UI=8084
+      - KINESIS_ERROR_PROBABILITY=${KINESIS_ERROR_PROBABILITY- }
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - HOST_TMP_FOLDER=${TMPDIR}
+      - LAMBDA_EXECUTOR=docker
+      - LAMBDA_DOCKER_NETWORK=host
+      - LAMDBA_REMOVE_CONTAINERS=false
+      - EXTRA_CORS_ALLOWED_HEADERS=Authorization
+      - DEBUG=true
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
