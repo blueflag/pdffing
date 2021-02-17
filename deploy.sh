@@ -14,3 +14,5 @@ if [ "$STAGE" != "dev" ]; then
 fi
 terraform init -no-color 
 terraform apply -no-color -auto-approve -var stage=$STAGE
+
+terraform state show module.pdffing.aws_api_gateway_rest_api.pdffing_api

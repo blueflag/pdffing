@@ -21,7 +21,7 @@
     ],
     "rootDir": "./src",
     "paths": {
-      "bfu-data-lambda-v2/src/*": ["src/*"]
+      "pdffing/src/*": ["src/*"]
     },
     "strict": true,
     "noUnusedLocals": true,

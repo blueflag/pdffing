@@ -1,43 +1,34 @@
 import {APIGatewayProxyEvent, Context, APIGatewayProxyResult} from 'aws-lambda';
-import {Dictionary, PaperSize, Orientation, RenderParams} from './types';
+import {RenderParams} from './types';
+import parseParameters from './processes/parse_parameters';
 import renderPdf from './processes/render-pdf';
 
-function splitCookies(cookies: string): Dictionary<string>{
-    const cookieValues: Array<string> = cookies.split(';');
-    const cookieMap: Dictionary<string> = {};
-    for (let i: number = 0; i < cookieValues.length; i++) {
-        const cookieNameValuePairs: Array<string> = cookieValues[i].split('=');
-        cookieMap[cookieNameValuePairs[0].trim()] = cookieNameValuePairs[1].trim();
-    }
-    return cookieMap;
-}
-
-function parseParameters(event: APIGatewayProxyEvent): RenderParams {
-    if(!event.queryStringParameters) { 
-			throw new Error('No query string parameters');
-		}
-
-			const params: RenderParams = {
-				path: event.queryStringParameters.path,
-				paperSize: PaperSize[event.queryStringParameters.paperSize] ?? PaperSize.Letter,
-				orientation: Orientation[event.queryStringParameters.orientation] ?? Orientation.landscape
-			};
-			if(event.queryStringParameters.jwt) {
-					params.jwt = event.queryStringParameters.jwt;
-			}
-			if(event.queryStringParameters.passCookies && event.headers?.Cookie) {
-					params.cookies = splitCookies(event.headers.Cookie);
-			}
-		return params;
-}
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
 
 		try {
+
+			console.log(`${event.httpMethod}: ${event.resource} (${context.invokedFunctionArn})`);
+
 			const params: RenderParams = parseParameters(event);
-			renderPdf(params);
+			console.log({params});
+			if(!params.path) {
+				return {
+					statusCode: 400,
+					headers: {
+							'Content-Type': 'application/json',
+							'Access-Control-Allow-Origin': '*',
+					},
+					body: JSON.stringify({
+						error: 'No path provided'
+					})
+			}
+			}
+
+
+			const filename = renderPdf(params);
 				
-			console.log({event, context});
+			//console.log({event, context});
 			return {
 				statusCode: 200,
 				headers: {
@@ -46,10 +37,12 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 				},
 				body: JSON.stringify({
 						params,
-						input: event
+						input: event,
+						filename
 				})
 			}
 		} catch (err: any) {
+			console.error(err);
 				return {
 					statusCode: 400,
 					headers: {

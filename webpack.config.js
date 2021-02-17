@@ -1,6 +1,8 @@
 const path = require('path');
 const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
+const nodeExternals = require("webpack-node-externals");
+const package = require("./package.json");
 
 module.exports = function() {
     const mode = process.env.RUN_LOCAL ? "development" : "production";
@@ -24,7 +26,8 @@ module.exports = function() {
         cache: production,
         devtool: production ? 'source-map' : undefined,
         entry: {
-            index: path.resolve(__dirname, './src/index.ts')
+            index: path.resolve(__dirname, './src/index.ts'),
+      test: path.resolve(__dirname, './src/test.ts')
         },
         target: 'node',
         resolve: {
@@ -40,7 +43,8 @@ module.exports = function() {
         },
         plugins: [
             new CopyPlugin([
-                {from: './version.json', to: '.'}
+                {from: './version.json', to: '.'},
+                {from: './node_modules/chrome_aws_lambda', to: './node_modules/chrome_aws_lambda'}
             ])
         ],
         module: {
@@ -50,6 +54,16 @@ module.exports = function() {
         },
         optimization: {
             minimize: false
-        }
+        },
+        externals: [
+					'puppeteer',
+					'chrome-aws-lambda'
+					/*
+         nodeExternals({
+          allowlist: Object.keys(package.dependencies)
+         })
+				 */
+        ],
+
     };
 }();
