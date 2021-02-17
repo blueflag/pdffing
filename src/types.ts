@@ -23,7 +23,8 @@ interface RenderParams {
     cookies?: Dictionary<string>,
     path: string,
     paperSize: PaperSize,
-    orientation: Orientation
+    orientation: Orientation,
+		destDir?: string
 };
 
 export {

@@ -1,12 +1,15 @@
 import puppeteer, {Browser, Page} from 'puppeteer-core';
 import chromium from 'chrome-aws-lambda';
 import {RenderParams} from '../types';
+import shortid from 'shortid';
+import path from 'path';
 
-console.log({chromium});
+const format = 'pdf';
 
 export default async function renderPdf(params: RenderParams): Promise<string> {
-	const {path} = params;
-	const filename: string = 'test.pdf';
+	const {path: uri} = params;
+	const destDir = params.destDir || './';
+	const filename: string = path.join(destDir, `${shortid.generate()}.${format}`);
 
 	if(!path) {
 		throw new Error('No render path provided');
@@ -14,7 +17,7 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
 
 	console.log(puppeteer);
 
-	console.log(`Render ${path}`);
+	console.log(`Render ${uri}`);
 
 	try {
 		const executablePath = await chromium.executablePath;
@@ -30,11 +33,10 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
 		console.log('browser', browser);
 		const page: Page = await browser.newPage();
 		console.log('page');
-		//await page.goto(params.path);
-		await page.goto('http://elvey.lv');
+		await page.goto(uri);
 		console.log('navigate');
 		//await page.screenshot({path: 'test.png'});
-		await page.pdf({path: 'test.pdf', printBackground: true});
+		await page.pdf({path: filename, printBackground: true});
 		console.log('pdf');
 
 		await browser.close();

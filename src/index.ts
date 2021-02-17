@@ -2,6 +2,7 @@ import {APIGatewayProxyEvent, Context, APIGatewayProxyResult} from 'aws-lambda';
 import {RenderParams} from './types';
 import parseParameters from './processes/parse_parameters';
 import renderPdf from './processes/render-pdf';
+const TMP_PATH = '/tmp/';
 
 
 export const handler = async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
@@ -11,6 +12,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 			console.log(`${event.httpMethod}: ${event.resource} (${context.invokedFunctionArn})`);
 
 			const params: RenderParams = parseParameters(event);
+			params.destDir = TMP_PATH;
 			console.log({params});
 			if(!params.path) {
 				return {
@@ -26,7 +28,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 			}
 
 
-			const filename = renderPdf(params);
+			const filename = await renderPdf(params);
 				
 			//console.log({event, context});
 			return {
@@ -37,7 +39,6 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 				},
 				body: JSON.stringify({
 						params,
-						input: event,
 						filename
 				})
 			}
