@@ -34,6 +34,12 @@ EOF
         stage = var.stage
     }
 }
+
+resource "aws_s3_bucket" "pdf_bucket" {
+  bucket = "s3pdffing"
+  acl    = "public-read"
+}
+
 data "aws_iam_policy_document" "lambda_policy" {
   # Allow Cloudwatch Logging
   statement {
@@ -44,22 +50,21 @@ data "aws_iam_policy_document" "lambda_policy" {
       "logs:PutLogEvents"
     ]
     resources = [
-      "${aws_cloudwatch_log_group.bfu_data_logs.arn}"
+      "${aws_cloudwatch_log_group.pdf_logs.arn}"
     ]
   }
-  # Allow SSM var access for server to server auth (bfapplication-<STAGE>)
+  # Allow access to s3 bucket
   statement {
     sid = "3"
     actions = [
-      "ssm:GetParameter",
-      "ssm:PutParameter"
+      "s3:*"
     ]
     resources = [
-      "arn:aws:ssm:ap-southeast-2:*:parameter/bfapplication-${var.stage}/authKeypair/publicKey",
-      "arn:aws:ssm:ap-southeast-2:*:parameter/bfapplication-${var.stage}/authKeypair/privateKey"
+      "arn:aws:s3:::*"
     ]
   }
 }
+
 # See also the following AWS managed policy: AWSLambdaBasicExecutionRole
 resource "aws_iam_policy" "lambda_policy" {
   name        = "pdffing-lambda_policy-${var.stage}"
@@ -70,7 +75,7 @@ resource "aws_iam_role_policy_attachment" "lambda_policy_attachment" {
   role       = aws_iam_role.iam_for_lambda.name
   policy_arn = aws_iam_policy.lambda_policy.arn
 }
-resource "aws_cloudwatch_log_group" "bfu_data_logs" {
+resource "aws_cloudwatch_log_group" "pdf_logs" {
   name              = "/aws/lambda/${aws_lambda_function.pdffing.function_name}"
   retention_in_days = 14
 }

@@ -26,7 +26,7 @@ module "certificate_apigw" {
 }
 
 
-resource "aws_api_gateway_domain_name" "lambda_domain" {
+resource "aws_api_gateway_domain_name" "pdf_lambda_domain" {
   regional_certificate_arn = module.certificate_apigw.certificate_id
   domain_name     = var.domain_name
   endpoint_configuration {
@@ -34,20 +34,20 @@ resource "aws_api_gateway_domain_name" "lambda_domain" {
   }
 }
 
-resource "aws_route53_record" "lambda_domain_record" {
-  name    = aws_api_gateway_domain_name.lambda_domain.domain_name
+resource "aws_route53_record" "pdf_lambda_domain_record" {
+  name    = aws_api_gateway_domain_name.pdf_lambda_domain.domain_name
   type    = "A"
   zone_id = var.zone_id
 
   alias {
     evaluate_target_health = true
-    name                   = aws_api_gateway_domain_name.lambda_domain.regional_domain_name
-    zone_id                = aws_api_gateway_domain_name.lambda_domain.regional_zone_id
+    name                   = aws_api_gateway_domain_name.pdf_lambda_domain.regional_domain_name
+    zone_id                = aws_api_gateway_domain_name.pdf_lambda_domain.regional_zone_id
   }
 }
 
 resource "aws_api_gateway_base_path_mapping" "api_gateway_mapping" {
   api_id      = var.api_gateway_id
   stage_name  = var.stage
-  domain_name = aws_api_gateway_domain_name.lambda_domain.domain_name
+  domain_name = aws_api_gateway_domain_name.pdf_lambda_domain.domain_name
 }
