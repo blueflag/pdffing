@@ -29,7 +29,7 @@ resource "aws_iam_role" "iam_for_lambda" {
 EOF
     tags = {
         client = "blueflag"
-        product = "bfu"
+        product = "pdffing"
         package = "pdffing"
         stage = var.stage
     }
@@ -95,7 +95,7 @@ resource "aws_lambda_function" "pdffing" {
   }
   tags = {
     client = "blueflag"
-    product = "bfu"
+    product = "pdffing"
     package = "pdffing"
     stage = var.stage
   }

@@ -32,6 +32,6 @@ module "api_gateway_mapping" {
   source = "../apigw-mapping"
   stage = var.stage
   zone_id = data.aws_route53_zone.external.zone_id
-  domain_name = "data.user.blueflag.services"
+  domain_name = "pdffing.blueflag.services"
   api_gateway_id = module.pdffing_lambda.api_gateway_id
 }

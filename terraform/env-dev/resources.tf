@@ -31,6 +31,6 @@ module "api_gateway_mapping" {
   source = "../apigw-mapping"
   stage = var.stage
   zone_id = data.aws_route53_zone.external.zone_id
-  domain_name = "${var.stage}.data.user.services.ontrak.dev"
+  domain_name = "${var.stage}.pdffing.services.ontrak.dev"
   api_gateway_id = module.pdffing_lambda.api_gateway_id
 }
