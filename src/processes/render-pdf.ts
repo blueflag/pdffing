@@ -1,6 +1,6 @@
 import puppeteer, {Browser, Page} from 'puppeteer-core';
 import chromium from 'chrome-aws-lambda';
-import {RenderParams} from '../types';
+import {RenderParams, Orientation} from '../types';
 import shortid from 'shortid';
 import path from 'path';
 
@@ -36,7 +36,13 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
 		await page.goto(uri);
 		console.log('navigate');
 		//await page.screenshot({path: 'test.png'});
-		await page.pdf({path: filename, printBackground: true});
+		await page.pdf({
+			path: filename,
+			printBackground: true,
+			format: params.paperSize,
+			landscape: params.orientation == Orientation.landscape
+
+		});
 		console.log('pdf');
 
 		await browser.close();

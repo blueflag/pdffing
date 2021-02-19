@@ -12,16 +12,17 @@ const endpoint = process.env.LOCALSTACK_HOSTNAME ? `http://${process.env.LOCALST
  * 
  * @param {string} uploadKey key to be used for the upload.
  * @param {string} buffer buffer to upload
+ * @param {string} filename type of content being uploaded.
  * @param {string} contentType type of content being uploaded.
  * @returns {Promise<string>} signed url for accessing content.
  */
-function uploadS3File(buffer: Buffer): Promise<string> {
+function uploadS3File(buffer: Buffer, filename: string, contentType: string = CONTENT_TYPE): Promise<string> {
     return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-			const key = `${S3_PATH}/${shortid.generate()}`;
+			const key = `${S3_PATH}/${filename || shortid.generate()}`;
 			const params = {
 					Bucket: AWS_S3_BUCKET,
 					Key: key,
-					ContentType: CONTENT_TYPE,
+					ContentType: contentType,
 					Body: buffer
 			};
 			const s3Params: any = {};

@@ -31,13 +31,10 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 
 
 			const filename = await renderPdf(params);
-			console.log({filename});
 			const buffer = fs.readFileSync(filename);
-			const result = await uploadS3(buffer);
-			console.log('s3 uploaded', result);
+			const fileUrl = await uploadS3(buffer, filename);
 			fs.unlinkSync(filename);
 				
-			//console.log({event, context});
 			return {
 				statusCode: 200,
 				headers: {
@@ -45,8 +42,7 @@ export const handler = async (event: APIGatewayProxyEvent, context: Context): Pr
 						'Access-Control-Allow-Origin': '*',
 				},
 				body: JSON.stringify({
-						params,
-						filename
+						url: fileUrl
 				})
 			}
 		} catch (err: any) {

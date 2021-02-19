@@ -19,7 +19,7 @@ function parseParameters(event: APIGatewayProxyEvent): RenderParams {
 
 			const params: RenderParams = {
 				path: event.queryStringParameters.path,
-				paperSize: PaperSize[event.queryStringParameters.paperSize] ?? PaperSize.Letter,
+				paperSize: PaperSize[event.queryStringParameters.paperSize] ?? PaperSize.letter,
 				orientation: Orientation[event.queryStringParameters.orientation] ?? Orientation.landscape
 			};
 			if(event.queryStringParameters.jwt) {

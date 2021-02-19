@@ -4,14 +4,14 @@ interface Dictionary<T> {
     [Key: string]: T;
 };
 
-enum PaperSize {
-    A3 = 'A3',
-		A4 = 'A4',
-		A5 = 'A5',
-		Legal = 'Legal',
-		Letter = 'Letter',
-		Tabloid = 'Tabloid'
-};
+const PaperSize = {
+    a3: 'a3',
+		a4: 'a4',
+		a5: 'a5',
+		legal: 'legal',
+		letter: 'letter',
+		tabloid: 'tabloid'
+} as const;
 
 enum Orientation {
 		portrait = 'portrait',
@@ -22,7 +22,7 @@ interface RenderParams {
     jwt?: string,
     cookies?: Dictionary<string>,
     path: string,
-    paperSize: PaperSize,
+    paperSize: "letter" | "legal" | "tabloid" | "ledger" | "a0" | "a1" | "a2" | "a3" | "a4" | "a5" | "a6" | undefined,
     orientation: Orientation,
 		destDir?: string
 };
