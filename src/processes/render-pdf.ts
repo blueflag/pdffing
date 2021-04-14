@@ -7,7 +7,7 @@ import path from 'path';
 const format = 'pdf';
 
 export default async function renderPdf(params: RenderParams): Promise<string> {
-	const {path: uri} = params;
+	const {path: uri, jwt: string} = params;
 	const destDir = params.destDir || './';
 	const filename: string = path.join(destDir, `${shortid.generate()}.${format}`);
 
@@ -32,6 +32,9 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
 		});
 		console.log('browser', browser);
 		const page: Page = await browser.newPage();
+        if(jwt) {
+          await page.setExtraHTTPHeaders({'Authorization': `bearer ${jwt}`});
+        }
 		console.log('page');
 		await page.goto(uri);
 		console.log('navigate');

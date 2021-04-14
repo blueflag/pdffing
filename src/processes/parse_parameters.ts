@@ -1,5 +1,8 @@
-import {APIGatewayProxyEvent} from 'aws-lambda';
+import {APIGatewayProxyEvent, APIGatewayProxyEventHeaders} from 'aws-lambda';
 import {Dictionary, PaperSize, Orientation, RenderParams} from '../types';
+
+const authHeader = 'Authorization';
+const tokenStart = 'Bearer ';
 
 
 function splitCookies(cookies: string): Dictionary<string>{
@@ -14,21 +17,25 @@ function splitCookies(cookies: string): Dictionary<string>{
 
 function parseParameters(event: APIGatewayProxyEvent): RenderParams {
     if(!event.queryStringParameters) { 
-			throw new Error('No query string parameters');
-		}
+      throw new Error('No query string parameters');
+    }
+    const headers: APIGatewayProxyEventHeaders = event.headers;
 
-			const params: RenderParams = {
-				path: event.queryStringParameters.path,
-				paperSize: PaperSize[event.queryStringParameters.paperSize] ?? PaperSize.letter,
-				orientation: Orientation[event.queryStringParameters.orientation] ?? Orientation.landscape
-			};
-			if(event.queryStringParameters.jwt) {
-					params.jwt = event.queryStringParameters.jwt;
-			}
-			if(event.queryStringParameters.passCookies && event.headers?.Cookie) {
-					params.cookies = splitCookies(event.headers.Cookie);
-			}
-		return params;
+    const params: RenderParams = {
+        path: event.queryStringParameters.path,
+        paperSize: PaperSize[event.queryStringParameters.paperSize] ?? PaperSize.letter,
+        orientation: Orientation[event.queryStringParameters.orientation] ?? Orientation.landscape
+    };
+    if(event.queryStringParameters.jwt) {
+            params.jwt = event.queryStringParameters.jwt;
+    } else if(headers[authHeader]) {
+      if(headers[authHeader].startWith(tokenStart)) {
+        params.jwt = headers[authHeader].substring(tokenStart.length);
+    }
+    if(event.queryStringParameters.passCookies && event.headers?.Cookie) {
+            params.cookies = splitCookies(event.headers.Cookie);
+    }
+    return params;
 }
 
-export default parseParameters;
+  export default parseParameters;
