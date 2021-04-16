@@ -7,7 +7,8 @@ import path from 'path';
 const format = 'pdf';
 
 export default async function renderPdf(params: RenderParams): Promise<string> {
-	const {path: uri, jwt: string} = params;
+	const {path: uri} = params;
+    const jwt: string|undefined = params.jwt;
 	const destDir = params.destDir || './';
 	const filename: string = path.join(destDir, `${shortid.generate()}.${format}`);
 
@@ -33,7 +34,12 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
 		console.log('browser', browser);
 		const page: Page = await browser.newPage();
         if(jwt) {
-          await page.setExtraHTTPHeaders({'Authorization': `bearer ${jwt}`});
+          await page.setExtraHTTPHeaders({'Authorization': `Bearer ${jwt}`});
+          console.log(`Set bearer token ${jwt}`);
+        }
+        if(params.cookie) {
+          await page.setExtraHTTPHeaders({'cookie': params.cookie}});
+          console.log('Set cookie');
         }
 		console.log('page');
 		await page.goto(uri);

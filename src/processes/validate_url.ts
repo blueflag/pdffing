@@ -2,7 +2,8 @@
 const validationTests: RegExp[] = [
   /https?:\/\/(staging\.)?toyotainstituteaustralia.com.au\/.*/,
   /https?:\/\/blueflag.com.au\/.*/,
-  /https?:\/\/bigdatr.com\/.*/
+  /https?:\/\/bigdatr.com\/.*/,
+  /https?:\/\/manytools.org.*/, // Used for testing headers
 ]
 
 export default function validateUrl(url: string): boolean {

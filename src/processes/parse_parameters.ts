@@ -1,4 +1,4 @@
-import {APIGatewayProxyEvent, APIGatewayProxyEventHeaders} from 'aws-lambda';
+import {APIGatewayProxyEvent} from 'aws-lambda';
 import {Dictionary, PaperSize, Orientation, RenderParams} from '../types';
 
 const authHeader = 'Authorization';
@@ -19,18 +19,23 @@ function parseParameters(event: APIGatewayProxyEvent): RenderParams {
     if(!event.queryStringParameters) { 
       throw new Error('No query string parameters');
     }
-    const headers: APIGatewayProxyEventHeaders = event.headers;
+   // const headers: APIGatewayProxyEventHeaders = event.headers;
+    const headers: APIGatewayProxyEvent["headers"] = event.headers;
 
     const params: RenderParams = {
         path: event.queryStringParameters.path,
-        paperSize: PaperSize[event.queryStringParameters.paperSize] ?? PaperSize.letter,
-        orientation: Orientation[event.queryStringParameters.orientation] ?? Orientation.landscape
+        paperSize: PaperSize[event.queryStringParameters.paperSize] || PaperSize.letter,
+        orientation: Orientation[event.queryStringParameters.orientation] || Orientation.landscape
     };
     if(event.queryStringParameters.jwt) {
             params.jwt = event.queryStringParameters.jwt;
     } else if(headers[authHeader]) {
-      if(headers[authHeader].startWith(tokenStart)) {
+      if(headers[authHeader].startsWith(tokenStart)) {
         params.jwt = headers[authHeader].substring(tokenStart.length);
+      }
+    }
+    if(headers['cookie']) {
+      params.cookie = headers['cookie'];
     }
     if(event.queryStringParameters.passCookies && event.headers?.Cookie) {
             params.cookies = splitCookies(event.headers.Cookie);
