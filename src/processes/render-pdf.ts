@@ -73,8 +73,8 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
         return;
       }
       return new Promise((resolve, reject) => {
-        img.addEventListener(resolve);
-        img.addEventListener(reject);
+        img.addEventListener('load', resolve);
+        img.addEventListener('error', reject);
       });
     })));
     console.log('images loaded');
