@@ -18,30 +18,28 @@ const endpoint = process.env.LOCALSTACK_HOSTNAME ? `http://${process.env.LOCALST
  */
 function uploadS3File(buffer: Buffer, filename: string, contentType: string = CONTENT_TYPE): Promise<string> {
     return new Promise((resolve: (result: string) => void, reject: (error: Error) => void) => {
-			const key = `${S3_PATH}/${filename || shortid.generate()}`;
-			const params = {
-					Bucket: AWS_S3_BUCKET,
-					Key: key,
-					ContentType: contentType,
-					Body: buffer
-			};
-			const s3Params: any = {};
-			if(endpoint) {
-					s3Params.endpoint = endpoint ? new AWS.Endpoint(endpoint) : null
-			}
-			var s3 = new AWS.S3(s3Params);
-			console.log(params);
-			console.log(s3);
-			s3.upload(params, (err: Error): void => {
-					if (err != null){
-							return reject(err);
-					} else {
-							return resolve(s3.getSignedUrl('getObject', {
-									Bucket: AWS_S3_BUCKET,
-									Key: key
-							}));
-					}
-			});
-	});
+        const key = `${S3_PATH}/${filename || shortid.generate()}`;
+        const params = {
+            Bucket: AWS_S3_BUCKET,
+            Key: key,
+            ContentType: contentType,
+            Body: buffer
+        };
+        const s3Params: any = {};
+        if(endpoint) {
+            s3Params.endpoint = endpoint ? new AWS.Endpoint(endpoint) : null;
+        }
+        var s3 = new AWS.S3(s3Params);
+        s3.upload(params, (err: Error): void => {
+            if (err != null){
+                return reject(err);
+            } else {
+                return resolve(s3.getSignedUrl('getObject', {
+                    Bucket: AWS_S3_BUCKET,
+                    Key: key
+                }));
+            }
+        });
+    });
 }
 export default uploadS3File;

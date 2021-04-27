@@ -38,6 +38,16 @@ EOF
 resource "aws_s3_bucket" "pdf_bucket" {
   bucket = "s3pdffing"
   acl    = "public-read"
+
+  lifecycle_rule {
+    id = "pdf_lifecycle"
+    enabled = true
+
+    expiration {
+      days = 1
+    }
+
+  }
 }
 
 data "aws_iam_policy_document" "lambda_policy" {
@@ -128,13 +138,69 @@ resource "aws_api_gateway_integration" "apigw_int" {
   type                    = "AWS_PROXY"
   uri                     = aws_lambda_function.pdffing.invoke_arn
 }
+/*
+   resource "aws_api_gateway_integration" "cors_options_integration" {
+       connection_type      = "INTERNET"
+       http_method          = "OPTIONS"
+       request_templates    = {
+           "application/json" = jsonencode(
+                {
+                   statusCode = 200
+                }
+            )
+        }
+       rest_api_id   = aws_api_gateway_rest_api.pdffing_api.id
+       resource_id   = aws_api_gateway_resource.pdffing_resourece.id
+       timeout_milliseconds = 29000
+       type                 = "MOCK"
+    }
 
+   resource "aws_api_gateway_integration_response" "cors_options_response" {
+       http_method         = "OPTIONS"
+       rest_api_id   = aws_api_gateway_rest_api.pdffing_api.id
+       resource_id   = aws_api_gateway_resource.pdffing_resourece.id
+       response_parameters = {
+           "method.response.header.Access-Control-Allow-Headers" = "'Authorization,cookie,Content-Type,X-Amz-Date,X-Amz-Security-Token,X-Api-Key'"
+           "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,HEAD,GET,POST,PUT,PATCH,DELETE'"
+           "method.response.header.Access-Control-Allow-Origin"  = "'https://staging.toyotainstituteaustralia.com.au'"
+           "method.response.header.Access-Control-Max-Age"       = "'7200'"
+        }
+       status_code         = "200"
+    }
+
+  # module.pdffing_lambda.module.cors.aws_api_gateway_method._ will be created
+   resource "aws_api_gateway_method" "cors_options" {
+       api_key_required = false
+       authorization    = "NONE"
+       http_method      = "OPTIONS"
+       rest_api_id   = aws_api_gateway_rest_api.pdffing_api.id
+       resource_id   = aws_api_gateway_resource.pdffing_resourece.id
+    }
+
+  # module.pdffing_lambda.module.cors.aws_api_gateway_method_response._ will be created
+   resource "aws_api_gateway_method_response" "cors_response" {
+       http_method         = "OPTIONS"
+       rest_api_id   = aws_api_gateway_rest_api.pdffing_api.id
+       resource_id   = aws_api_gateway_resource.pdffing_resourece.id
+       response_models     = {
+           "application/json" = "Empty"
+        }
+       response_parameters = {
+           "method.response.header.Access-Control-Allow-Headers" = true
+           "method.response.header.Access-Control-Allow-Methods" = true
+           "method.response.header.Access-Control-Allow-Origin"  = true
+           "method.response.header.Access-Control-Max-Age"       = true
+        }
+       status_code         = "200"
+    }
+*/
 module "cors" {
    source = "squidfunk/api-gateway-enable-cors/aws"
    version = "0.3.1"
 
-   api_id          = aws_api_gateway_rest_api.pdffing_api.id
-   api_resource_id = aws_api_gateway_resource.pdffing_resourece.id
+   api_id   = aws_api_gateway_rest_api.pdffing_api.id
+   api_resource_id   = aws_api_gateway_resource.pdffing_resourece.id
+   allow_origin = "*"
 }
 
 resource "aws_api_gateway_deployment" "apigw_deployment" {
