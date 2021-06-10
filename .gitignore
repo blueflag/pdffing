@@ -5,3 +5,5 @@ lambda_function_payload.zip
 .terraform
 **/env-local/terraform.tfstate
 *.swp
+tmp
+.DS_Store

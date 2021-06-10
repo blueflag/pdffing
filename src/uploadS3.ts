@@ -3,7 +3,7 @@ import shortid from 'shortid';
 
 const AWS_S3_BUCKET: string = process.env.S3_BUCKET || 's3pdffing';
 const S3_PATH: string = process.env.S3_PATH  || 'pdfs';
-const CONTENT_TYPE: string = 'application/pdf';
+const CONTENT_TYPE = 'application/pdf';
 const endpoint = process.env.LOCALSTACK_HOSTNAME ? `http://${process.env.LOCALSTACK_HOSTNAME}:4566` : null;
 
 
@@ -25,11 +25,11 @@ function uploadS3File(buffer: Buffer, filename: string, contentType: string = CO
             ContentType: contentType,
             Body: buffer
         };
-        const s3Params: any = {};
+        const s3Params: AWS.S3.Types.ClientConfiguration = {};
         if(endpoint) {
-            s3Params.endpoint = endpoint ? new AWS.Endpoint(endpoint) : null;
+            s3Params.endpoint = new AWS.Endpoint(endpoint);
         }
-        var s3 = new AWS.S3(s3Params);
+        const s3 = new AWS.S3(s3Params);
         s3.upload(params, (err: Error): void => {
             if (err != null){
                 return reject(err);
