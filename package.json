@@ -41,7 +41,6 @@
     "@babel/preset-env": "^7.13.15",
     "@babel/preset-typescript": "7.10.4",
     "@babel/runtime": "^7.5.5",
-    "@blueflag/bfu-node-sdk-v2": "^2.1.1",
     "@types/aws-lambda": "8.10.63",
     "@types/jest": "26.0.14",
     "@types/puppeteer": "^5.4.3",

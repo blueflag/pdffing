@@ -11,7 +11,6 @@ module.exports = function() {
     const src = path.resolve('src');
 
     const JS_LOADER = {
-        test: /\.(js|ts)$/,
         include: [src],
         use: {
             loader: 'babel-loader',
@@ -27,7 +26,6 @@ module.exports = function() {
         devtool: production ? 'source-map' : undefined,
         entry: {
             index: path.resolve(__dirname, './src/index.ts'),
-      test: path.resolve(__dirname, './src/test.ts')
         },
         target: 'node',
         resolve: {
@@ -43,7 +41,6 @@ module.exports = function() {
         },
         plugins: [
             new CopyPlugin([
-                {from: './version.json', to: '.'},
                 {from: './node_modules/chrome_aws_lambda', to: './node_modules/chrome_aws_lambda'}
             ])
         ],
