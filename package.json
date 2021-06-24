@@ -1,109 +1,74 @@
 {
-  "name": "pdf-export",
-  "version": "0.0.0",
-  "description": "",
-  "main": "prod.js",
-  "license": "UNLICENSED",
-  "author": "Paul Esson",
+  "name": "@blueflag/pdffing",
+  "nameShort": "pdffing",
+  "service": {
+    "localPortOffset": 10,
+    "endpoint": "https://<stage>.data.user.services.ontrak.dev/graph",
+    "localstackName": "<stage>-pdffing",
+    "localstackEndpoint": "/graph"
+  },
+  "blueflag": {
+    "deploy": {
+      "depends": [],
+      "command": {
+        "run": "./deploy.sh"
+      },
+      "files": [
+        "deploy.sh",
+        "lambda_function_payload.zip",
+        "terraform/**"
+      ]
+    }
+  },
+  "version": "0.0.17",
+  "description": "Lambda that genereates a PDF file of a provided webpage and stores it in s3",
+  "main": "index.js",
+  "author": "Blueflag",
+  "license": "PRIVATE",
   "private": true,
   "scripts": {
-    "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist",
-    "check-coverage": "nyc check-coverage --branches 100  --functions 100 --lines 100",
-    "deploy": "yarn run build && node scripts/bundle && cd bundle && yarn install --ignore-engines --prod && node -r dotenv/config ../node_modules/.bin/serverless deploy -v && cd ../",
-    "dev": "node -r dotenv/config ./node_modules/.bin/serverless offline --port 3000",
-    "dev-nocache": "nodemon -r dotenv/config ./node_modules/.bin/serverless offline --skipCacheInvalidation --dontPrintOutput",
-    "docs": "jsdoc -c jsdoc-config.json",
-    "flow": "flow check",
-    "lint": "eslint src/**/*.jsx src/**/*.js",
-    "lint-fix": "eslint src/**/*.jsx src/**/*.js --fix",
-    "test": "NODE_ENV=test nyc --report-dir=./coverage ava && yarn run check-coverage",
-    "test-all": "NODE_ENV=test yarn run lint && yarn run flow && yarn run test",
-    "logs": "node -r dotenv/config ./node_modules/.bin/serverless logs -f exportpdf -t",
-    "delete": "node -r dotenv/config ./node_modules/.bin/serverless delete"
+    "build": "yarn tsc && yarn webpack && yarn package",
+    "package": "zip -r lambda_function_payload.zip dist/",
+    "deploy": "./deploy.sh",
+    "deploy-local": "yarn build && yarn package && rm -rf terraform/env-local/.terraform terraform/env-local/terraform.tfstate.d /terraform/env-local/terraform.tfstate && STAGE=local ./deploy.sh",
+    "lint": "yarn eslint . --ext .ts,.tsx --no-error-on-unmatched-pattern",
+    "test": "yarn jest --runInBand --forceExit --detectOpenHandles"
   },
   "devDependencies": {
-    "app-module-path": "^2.1.0",
-    "ava": "^0.17.0",
-    "babel-cli": "^6.18.0",
-    "babel-core": "^6.21.0",
-    "babel-plugin-istanbul": "^3.0.0",
-    "babel-plugin-transform-class-properties": "^6.19.0",
-    "babel-plugin-transform-runtime": "^6.15.0",
-    "babel-preset-blueflag": "^0.0.1",
-    "babel-preset-es2016": "^6.16.0",
-    "babel-preset-es2017": "^6.16.0",
-    "babel-preset-stage-3": "^6.17.0",
-    "babel-register": "^6.18.0",
-    "enzyme": "^2.6.0",
-    "eslint": "^3.12.2",
-    "eslint-config-blueflag": "^0.4.0",
-    "flow-bin": "^0.37.0",
-    "fs-extra": "^1.0.0",
-    "glob-all": "^3.1.0",
-    "js-yaml": "^3.7.0",
-    "jsdoc": "^3.4.3",
-    "jsdoc-babel": "^0.3.0",
-    "jsdonk": "^0.2.3",
-    "nodemon": "^1.11.0",
-    "nyc": "^10.0.0",
-    "proxyquire": "^1.7.10",
-    "react": "^15.4.1",
-    "serverless-offline": "^3.5.7",
-    "sinon": "^1.17.7"
+    "@babel/cli": "^7.1.2",
+    "@babel/core": "^7.1.2",
+    "@babel/plugin-proposal-class-properties": "^7.1.0",
+    "@babel/preset-env": "^7.13.15",
+    "@babel/preset-typescript": "7.10.4",
+    "@babel/runtime": "^7.5.5",
+    "@types/aws-lambda": "8.10.63",
+    "@types/jest": "26.0.14",
+    "@types/puppeteer": "^5.4.3",
+    "@typescript-eslint/eslint-plugin": "^3.9.1",
+    "@typescript-eslint/parser": "^3.9.1",
+    "app-module-path": "^2.2.0",
+    "aws-sdk": "^2.141.0",
+    "babel-loader": "^8.0.4",
+    "body-parser": "^1.19.0",
+    "clean-webpack-plugin": "^0.1.19",
+    "copy-webpack-plugin": "^5.0.3",
+    "eslint": "^7.7.0",
+    "eslint-config-blueflag": "^0.11.1",
+    "eslint-plugin-jest": "23.20.0",
+    "express": "^4.17.1",
+    "faker": "^4.1.0",
+    "jest": "26.4.2",
+    "puppeteer": "^7.0.4",
+    "ts-jest": "^24.0.2",
+    "typescript": "^4.0.2",
+    "webpack": "^4.28.4",
+    "webpack-cli": "^4.5.0",
+    "webpack-node-externals": "^2.5.2"
   },
   "dependencies": {
-    "aws-sdk": "^2.7.21",
-    "babel-runtime": "^6.20.0",
-    "command-line-args": "^3.0.5",
-    "dotenv": "^2.0.0",
-    "immutable": "^3.8.1",
-    "jsonwebtoken": "^7.2.1",
-    "minimist": "^1.2.0",
-    "nightmare": "^2.9.1",
-    "phantomjs-polyfill": "0.0.2",
-    "phantomjs-prebuilt": "^2.1.14",
-    "serverless": "^1.5.0",
-    "shortid": "^2.2.6",
-    "xmlbuilder": "^8.2.2"
-  },
-  "ava": {
-    "require": [
-      "./pretest",
-      "babel-register"
-    ],
-    "babel": {
-      "presets": [
-        "blueflag"
-      ],
-      "plugins": [
-        "istanbul"
-      ],
-      "sourceMaps": "inline"
-    },
-    "files": [
-      "src/**/*-test.js"
-    ]
-  },
-  "nyc": {
-    "all": true,
-    "sourceMap": false,
-    "instrument": false,
-    "include": [
-      "src/**"
-    ],
-    "exclude": [
-      "src/**/*-test.js"
-    ],
-    "reporter": [
-      "lcov",
-      "text"
-    ],
-    "extension": [
-      ".js",
-      ".jsx"
-    ],
-    "require": [
-      "babel-register"
-    ]
+    "chrome-aws-lambda": "^7.0.0",
+    "puppeteer-core": "^7.1.0",
+    "shortid": "^2.2.16",
+    "winston": "^3.3.3"
   }
 }
