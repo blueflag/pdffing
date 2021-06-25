@@ -41,7 +41,8 @@ module.exports = function() {
         },
         plugins: [
             new CopyPlugin([
-                {from: './node_modules/chrome-aws-lambda', to: './node_modules/chrome-aws-lambda'}
+                {from: './node_modules/chrome-aws-lambda', to: './node_modules/chrome-aws-lambda'},
+                {from: './node_modules/lambdafs', to: './node_modules/lambdafs'}
             ])
         ],
         module: {
@@ -54,7 +55,8 @@ module.exports = function() {
         },
         externals: [
 					'puppeteer',
-					'chrome-aws-lambda'
+					'chrome-aws-lambda',
+                    'lambdafs'
 					/*
          nodeExternals({
           allowlist: Object.keys(package.dependencies)
