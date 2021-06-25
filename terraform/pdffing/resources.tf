@@ -11,6 +11,10 @@ variable "local" {
   description = "Is the service being run locally"
 }
 
+locals {
+  bucket = "s3pdffing-${var.stage}"
+}
+
 resource "aws_iam_role" "iam_for_lambda" {
   name = "iam_for_lambda_pdffing-${var.stage}"
   assume_role_policy = <<EOF
@@ -36,7 +40,7 @@ EOF
 }
 
 resource "aws_s3_bucket" "pdf_bucket" {
-  bucket = "s3pdffing"
+  bucket = local.bucket
   acl    = "public-read"
 
   lifecycle_rule {
@@ -101,6 +105,7 @@ resource "aws_lambda_function" "pdffing" {
   environment {
     variables = {
       STAGE = var.stage
+      S3_BUCKET = local.bucket
     }
   }
   tags = {

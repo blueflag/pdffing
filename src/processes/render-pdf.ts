@@ -75,8 +75,10 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
             path: filename,
             printBackground: true,
             format: params.paperSize,
-            landscape: params.orientation == Orientation.landscape
-
+            landscape: params.orientation == Orientation.landscape,
+            margin: {top: 0, left: 0, right: 0, bottom: 0},
+            preferCSSPageSize: false,
+            displayHeaderFooter: false
         });
 
         await browser.close();
