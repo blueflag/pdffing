@@ -41,7 +41,7 @@ module.exports = function() {
         },
         plugins: [
             new CopyPlugin([
-                {from: './node_modules/chrome_aws_lambda', to: './node_modules/chrome_aws_lambda'}
+                {from: './node_modules/chrome-aws-lambda', to: './node_modules/chrome-aws-lambda'}
             ])
         ],
         module: {
