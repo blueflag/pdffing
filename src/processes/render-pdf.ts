@@ -39,6 +39,10 @@ export default async function renderPdf(params: RenderParams): Promise<string> {
             logger.info('Use cookie auth');
         }
 
+        if(params.timezone) {
+            await page.emulateTimezone(params.timezone);
+        }
+
 
         // If the request is an image from another origin or any resouce from s3 exclude the auth header
         await page.setRequestInterception(true);

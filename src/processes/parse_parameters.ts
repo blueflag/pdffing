@@ -40,6 +40,9 @@ function parseParameters(event: APIGatewayProxyEvent): RenderParams {
     if(event.queryStringParameters.passCookies && event.headers?.Cookie) {
         params.cookies = splitCookies(event.headers.Cookie);
     }
+    if(event.queryStringParameters.timezone) {
+        params.timezone = event.queryStringParameters.timezone;
+    }
     return params;
 }
 
