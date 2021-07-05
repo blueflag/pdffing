@@ -20,7 +20,7 @@ Exports a pdf version of a webpage and saves into an s3 bucket, then returns the
 
 | Name         | Type    | Description                                                                                                                          |
 |--------------|-------- |------------------------                                                                                                              |
-| jwt          | String  | JWT token to use to authenticate with server (optional)                                                                              |
+| jwt          | String  | JWT token to use to authenticate with server (optional and discouraged. Use a bearer token instead)                                  |
 | path         | String  | Location on the server to export (optional)                                                                                          |
 | passCookies  | Boolean | Should cookies be passed from this server to the next server. (optional)                                                             |
 | paperSize    | String  | The paper size for the generated PDF file. One of "letter", "legal", "tabloid", "ledger", "a0", "a1", "a2", "a3", "a4", "a5" or "a6" |
