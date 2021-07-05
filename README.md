@@ -18,11 +18,15 @@ Exports a pdf version of a webpage and saves into an s3 bucket, then returns the
 
 ### Path Parameters.
 
-| Name         | Type    | Description                                                  |
-|--------------|-------- |------------------------                                      |
-| jwt          | String  | JWT token to use to authenticate with server                 |
-| path         | String  | Location on the server to export                             |
-| passCookies  | Boolean | Should cookies be passed from this server to the next server.|
+| Name         | Type    | Description                                                                                                                          |
+|--------------|-------- |------------------------                                                                                                              |
+| jwt          | String  | JWT token to use to authenticate with server (optional)                                                                              |
+| path         | String  | Location on the server to export (optional)                                                                                          |
+| passCookies  | Boolean | Should cookies be passed from this server to the next server. (optional)                                                             |
+| paperSize    | String  | The paper size for the generated PDF file. One of "letter", "legal", "tabloid", "ledger", "a0", "a1", "a2", "a3", "a4", "a5" or "a6" |
+| orientation  | String  | The page orientation for the generated PDF file. Either "portrait" or "landscape"                                                    |
+| timezone     | String  | Use this timezome when rendering the page (Optional)                                                                                 |
+
 
 ### Example Response.
 
